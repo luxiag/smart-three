@@ -1,0 +1,52 @@
+html,body,#app {
+    height: 100%;
+    width: 100%;
+    color: #fff;
+}
+.diamond-btn {
+    position: relative;
+    display: inline-block;
+    padding: 5px 10px;
+    color: #fff;
+    background-color:transparent;
+    border: none;
+    cursor: pointer;
+    transform: skew(-20deg);
+    border-radius: 0;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3);
+    transition: box-shadow 0.2s ease-in-out;
+    text-shadow: 0 0 20px #29B6F6;
+  }
+  
+  .diamond-btn:hover {
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
+    // background-color: #233138;
+    background-color: #102d3b;
+    
+  }
+  
+  .diamond-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #FAFAFA;
+    transform: skew(20deg);
+    box-shadow: 0 0 5px #FAFAFA;
+    z-index: -1;
+  }
+  
+  .diamond-btn::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #FAFAFA;
+    transform: skew(-20deg);
+    box-shadow: 0 0 5px #FAFAFA;
+    z-index: -1;
+  }
