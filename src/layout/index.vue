@@ -5,10 +5,10 @@
       <div class="btn">
         <button class="diamond-btn">城市全景</button>
       </div>
-      <div class="btn"><button class="diamond-btn">城市全景</button></div>
-      <div class="btn"><button class="diamond-btn">城市全景</button></div>
-      <div class="btn"><button class="diamond-btn">城市全景</button></div>
-      <div class="btn"><button class="diamond-btn">城市全景</button></div>
+      <div class="btn"><button class="diamond-btn">城市交通</button></div>
+      <div class="btn"><button class="diamond-btn">城市规划</button></div>
+      <div class="btn"><button class="diamond-btn">城市管理</button></div>
+      <div class="btn"><button class="diamond-btn">城市区域</button></div>
     </div>
     <div class="container">
       <router-view></router-view>
@@ -42,6 +42,15 @@
     font-family: "Orbitron", sans-serif;
     text-shadow: 0 0 20px #29b6f6;
     // animation: flicker 2s infinite;
+  }
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  .center {
+    width: 100%;
+    height: 100%;
   }
 }
 @keyframes flicker {
