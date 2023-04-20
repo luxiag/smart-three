@@ -1,5 +1,4 @@
 <template>
-  <div>cityScene</div>
   <div class="left"></div>
   <div class="right"></div>
   <div class="center">
@@ -19,3 +18,11 @@ const activeComponent = {
   regionalPopulation,
 };
 </script>
+<style scoped lang="less">
+.center {
+  position: relative;
+  .use-list {
+    position: absolute;
+  }
+}
+</style>

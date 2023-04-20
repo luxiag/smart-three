@@ -21,8 +21,13 @@
   height: 100%;
   widows: 100%;
   background-color: #000;
+  position: relative;
+
+  overflow: hidden;
 }
 .btn-func {
+  position: relative;
+  z-index: 11;
   .btn {
     margin: 0 15px;
   }
@@ -30,11 +35,14 @@
 .header {
   //   padding: 20px 0;
   text-align: center;
-  background-color: black;
+  // background-color: black;
   //   height: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 11;
+  position: relative;
+
   h2 {
     color: white;
     // font-size: 80px;
@@ -48,6 +56,9 @@
 .container {
   width: 100%;
   height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
   .center {
     width: 100%;
     height: 100%;

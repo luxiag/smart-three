@@ -1,7 +1,5 @@
 <template>
   <div class="regionalPopulation-page page">
-    regionalPopulation
-
     <div
       id="regionalPopulationContainer"
       ref="regionalPopulationContainer"
