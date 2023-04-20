@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cesium": "^1.104.0",
     "echarts": "^5.4.2",
     "echarts-gl": "^2.0.9",
     "less": "^4.1.3",

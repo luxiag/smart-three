@@ -12,8 +12,10 @@
 </template>
 <script setup>
 import environment from "./environment.vue";
-const activeCompName = ref("environment");
+import regionalPopulation from "./regionalPopulation.vue";
+const activeCompName = ref("regionalPopulation");
 const activeComponent = {
   environment,
+  regionalPopulation,
 };
 </script>

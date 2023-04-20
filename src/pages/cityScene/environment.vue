@@ -1,7 +1,10 @@
 <template>
   <div class="environment-page page">
-    environment
+  
+    <div v-if="layer == 2" @click="getCityJSONFromCityName()">《---</div>
     <div class="echarts-map" ref="mapRef"></div>
+
+   
   </div>
 </template>
 <script setup>
@@ -12,6 +15,7 @@ const mapRef = ref();
 const mapGeoJSON = async () => await import("@/assets/json/GuangZhou.json");
 
 let mapChart;
+let cityJSONData;
 const init3DMap = async () => {
   mapChart = echarts.init(mapRef.value);
   mapChart.showLoading();
@@ -79,11 +83,12 @@ const init3DMap = async () => {
   //   ],
   // });
 };
+
+const layer = ref(1);
+
 const initMap = async () => {
   mapChart = echarts.init(mapRef.value);
   mapChart.showLoading();
-  const data = await mapGeoJSON();
-  echarts.registerMap("GuangZhou", data);
 
   mapChart.on("georoam", (params) => {
     let option = mapChart.getOption(); //获得option对象
@@ -98,11 +103,29 @@ const initMap = async () => {
     mapChart.setOption(option); //设置option
   });
   mapChart.on("click", (params) => {
-    console.log(params, "params");
+    console.log(params.name, "params");
+    getCityJSONFromCityName(params.name);
   });
+  getCityJSONFromCityName();
+
+  // mapChart.setOption({
+  //   series: [
+  //     {
+  //       type: "map3D",
+  //       map: "广州",
+  //       label: {
+  //         show: true,
+  //       },
+  //     },
+  //   ],
+  // });
+};
+const drawMapFromCityJSON = (mapDataJSON, mapName) => {
+  console.log(mapDataJSON, mapName);
+  echarts.registerMap(mapName, mapDataJSON);
   const option = {
     geo: {
-      map: "GuangZhou", //地图类型。
+      map: mapName, //地图类型。
       zoom: 1,
       roam: true,
       animation: false,
@@ -159,7 +182,7 @@ const initMap = async () => {
     series: [
       {
         type: "map",
-        map: "GuangZhou",
+        map: mapName,
         // 图形上的文本标签
         label: {
           show: true,
@@ -250,20 +273,25 @@ const initMap = async () => {
   };
   mapChart.setOption(option);
   mapChart.hideLoading();
-
-  // mapChart.setOption({
-  //   series: [
-  //     {
-  //       type: "map3D",
-  //       map: "广州",
-  //       label: {
-  //         show: true,
-  //       },
-  //     },
-  //   ],
-  // });
 };
+const getCityJSONFromCityName = async (cityName) => {
+  const data = await mapGeoJSON();
+  const cityJSON = { type: "FeatureCollection", features: [] };
 
+  if (!cityName) {
+    drawMapFromCityJSON(data, "GuangZhou");
+    layer.value = 1;
+    return;
+  }
+  for (let i = 0; i < data.features.length; i++) {
+    const area = data.features[i];
+    if (area.properties.name == cityName) {
+      cityJSON.features.push(area);
+      layer.value = 2;
+    }
+  }
+  drawMapFromCityJSON(cityJSON, cityName);
+};
 onMounted(() => {
   initMap();
 });
