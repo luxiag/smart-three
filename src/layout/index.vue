@@ -7,7 +7,7 @@
     </div>
     <div class="btn-func">
       <div class="btn">
-        <button class="class-btn">城市全景</button>
+        <button  @click="goPage('cityScene')" :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'">城市全景</button>
       </div>
       <div class="btn"><button class="class-btn active">城市交通</button></div>
       <div class="btn">
@@ -19,16 +19,22 @@
       </div>
       <div class="btn">
         <button
-          :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'"
+        @click="goPage('cityTraffic')"
+          :class="
+            route.path == '/cityTraffic' ? 'class-btn active' : 'class-btn'
+          "
         >
-          城市管理
+          智慧交通
         </button>
       </div>
       <div class="btn">
         <button
-          :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'"
+          @click="goPage('cityRegion')"
+          :class="
+            route.path == '/cityRegion' ? 'class-btn active' : 'class-btn'
+          "
         >
-          城市区域
+          区域分析
         </button>
       </div>
     </div>
@@ -126,7 +132,6 @@ onMounted(() => {
     margin-bottom: 10px;
   }
   .header-bg::before {
-
   }
   .title {
     padding: 10px 20px;

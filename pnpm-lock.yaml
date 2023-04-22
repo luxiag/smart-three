@@ -9,6 +9,7 @@ specifiers:
   normalize.css: ^8.0.1
   pinia: ^2.0.34
   pinia-plugin-persistedstate: ^3.1.0
+  three: ^0.151.3
   unplugin-auto-import: ^0.15.2
   vite: ^4.1.0
   vite-plugin-glsl: ^1.1.2
@@ -23,6 +24,7 @@ dependencies:
   normalize.css: 8.0.1
   pinia: 2.0.34_vue@3.2.47
   pinia-plugin-persistedstate: 3.1.0_pinia@2.0.34
+  three: 0.151.3
   unplugin-auto-import: 0.15.2
   vite-plugin-glsl: 1.1.2_vite@4.2.1
   vue: 3.2.47
@@ -1049,6 +1051,10 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  /three/0.151.3:
+    resolution: {integrity: sha512-+vbuqxFy8kzLeO5MgpBHUvP/EAiecaDwDuOPPDe6SbrZr96kccF0ktLngXc7xA7bzyd3N0t2f6mw3Z9y6JCojQ==}
+    dev: false
 
   /to-fast-properties/2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}

@@ -1,10 +1,9 @@
 <template>
   <div class="environment-page page">
-  
-    <div v-if="layer == 2" @click="getCityJSONFromCityName()">《---</div>
+    <div v-if="layer == 2" @click="getCityJSONFromCityName()">
+      <div class="back"></div>
+    </div>
     <div class="echarts-map" ref="mapRef"></div>
-
-   
   </div>
 </template>
 <script setup>
@@ -303,5 +302,33 @@ onMounted(() => {
     width: 100%;
     height: 100%;
   }
+}
+
+.back {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  cursor: pointer;
+}
+
+.back:before,
+.back:after {
+  content: "";
+  position: absolute;
+  border: 10px solid black;
+  transform: rotate(45deg);
+}
+
+.back:before {
+  top: 13px;
+  left: 11px;
+  border-width: 0 10px 10px 0;
+}
+
+.back:after {
+  top: 13px;
+  left: 19px;
+  border-width: 0 10px 10px 0;
+  transform: rotate(-45deg);
 }
 </style>

@@ -10,6 +10,7 @@
 <script setup>
 import * as Cesium from "cesium";
 import { onMounted } from "vue";
+// import "http://api.tianditu.gov.cn/cdn/plugins/cesium/cesiumTdt.js"
 
 const dataSource = new Cesium.GeoJsonDataSource();
 const regionalPopulationContainer = ref();
@@ -28,8 +29,10 @@ const initMap = () => {
     baseLayerPicker: false,
     // 是否显示帮助按钮
     navigationHelpButton: false,
+    shouldAnimate: true,
+    selectionIndicator: true,
     // 是否播放动画
-    animation: false,
+    animation: true,
     // 是否显示时间轴
     timeline: false,
     // 是否显示全屏按钮
@@ -37,26 +40,329 @@ const initMap = () => {
     selectionIndicator: false, // 隐藏指示器
   });
   viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  // createGeographicName();
   // viewer.cesiumWidget.selectionIndicatorContainer.style.display = "none";
+  const tdt_tk = "f901e2c576a572b55ae86d623207d9ef";
+  const TDTImgProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://t{s}.tianditu.com/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      tdt_tk,
+    layer: "天地图影像",
+    style: "default",
+    format: "image/jpeg",
+    subdomains: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    tileMatrixSetID: "GoogleMapsCompatible",
+  });
+
+  const TDTZJProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://t{s}.tianditu.com/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default.jpg&tk=" +
+      tdt_tk,
+    layer: "天地图中文注记",
+    style: "default",
+    format: "image/jpeg",
+    subdomains: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    tileMatrixSetID: "GoogleMapsCompatible",
+  });
+  viewer.imageryLayers.addImageryProvider(TDTImgProvider); //添加图层
+  viewer.imageryLayers.addImageryProvider(TDTZJProvider); //添加图层
+
   let isLoading = false;
-  const position = Cesium.Cartesian3.fromDegrees(113.2644, 22.1291, 200000);
   viewer.screenSpaceEventHandler.setInputAction(function (click) {
-    var cartesian = viewer.camera.pickEllipsoid(
+    let cartesian = viewer.camera.pickEllipsoid(
       click.position,
       viewer.scene.globe.ellipsoid
     );
     if (cartesian) {
-      var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-      var longitude = Cesium.Math.toDegrees(cartographic.longitude);
-      var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+      let cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+      let longitude = Cesium.Math.toDegrees(cartographic.longitude);
+      let latitude = Cesium.Math.toDegrees(cartographic.latitude);
       console.log({ lon: longitude, lat: latitude, val: 50 });
     }
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
   viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
     if (viewer.scene.globe.tilesLoaded === true) {
       console.log("地球加载完成！");
       if (!isLoading) {
-        viewer.camera.flyTo({
+
+        createCityBadge();
+        // create3DBar();
+        isLoading = true;
+      }
+    }
+  });
+};
+const createGeographicName = () => {
+  let token = "f901e2c576a572b55ae86d623207d9ef";
+  let tdtUrl = "https://t{s}.tianditu.gov.cn/";
+  // 服务负载子域
+  let subdomains = ["0", "1", "2", "3", "4", "5", "6", "7"];
+
+  // 叠加影像服务
+  let imgMap = new Cesium.UrlTemplateImageryProvider({
+    url: tdtUrl + "DataServer?T=img_w&x={x}&y={y}&l={z}&tk=" + token,
+    subdomains: subdomains,
+    tilingScheme: new Cesium.WebMercatorTilingScheme(),
+    maximumLevel: 18,
+  });
+  viewer.imageryLayers.addImageryProvider(imgMap);
+
+  // 叠加国界服务
+  let iboMap = new Cesium.UrlTemplateImageryProvider({
+    url: tdtUrl + "DataServer?T=ibo_w&x={x}&y={y}&l={z}&tk=" + token,
+    subdomains: subdomains,
+    tilingScheme: new Cesium.WebMercatorTilingScheme(),
+    maximumLevel: 10,
+  });
+  viewer.imageryLayers.addImageryProvider(iboMap);
+
+  // 叠加地形服务
+  let terrainUrls = new Array();
+
+  for (let i = 0; i < subdomains.length; i++) {
+    let url =
+      tdtUrl.replace("{s}", subdomains[i]) + "DataServer?T=elv_c&tk=" + token;
+    terrainUrls.push(url);
+  }
+
+  // let provider = new Cesium.GeoTerrainProvider({
+  //   urls: terrainUrls,
+  // });
+
+  // viewer.terrainProvider = provider;
+  // 叠加三维地名服务
+  let wtfs = new Cesium.GeoWTFS({
+    viewer,
+    subdomains: subdomains,
+    metadata: {
+      boundBox: {
+        minX: -180,
+        minY: -90,
+        maxX: 180,
+        maxY: 90,
+      },
+      minLevel: 1,
+      maxLevel: 20,
+    },
+    aotuCollide: true, //是否开启避让
+    collisionPadding: [5, 10, 8, 5], //开启避让时，标注碰撞增加内边距，上、右、下、左
+    serverFirstStyle: true, //服务端样式优先
+    labelGraphics: {
+      font: "28px sans-serif",
+      fontSize: 28,
+      fillColor: Cesium.Color.WHITE,
+      scale: 0.5,
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 5,
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      showBackground: false,
+      backgroundColor: Cesium.Color.RED,
+      backgroundPadding: new Cesium.Cartesian2(10, 10),
+      horizontalOrigin: Cesium.HorizontalOrigin.MIDDLE,
+      verticalOrigin: Cesium.VerticalOrigin.TOP,
+      eyeOffset: Cesium.Cartesian3.ZERO,
+      pixelOffset: new Cesium.Cartesian2(0, 8),
+    },
+    billboardGraphics: {
+      horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+      verticalOrigin: Cesium.VerticalOrigin.CENTER,
+      eyeOffset: Cesium.Cartesian3.ZERO,
+      pixelOffset: Cesium.Cartesian2.ZERO,
+      alignedAxis: Cesium.Cartesian3.ZERO,
+      color: Cesium.Color.WHITE,
+      rotation: 0,
+      scale: 1,
+      width: 18,
+      height: 18,
+    },
+  });
+
+  //三维地名服务，使用wtfs服务
+  wtfs.getTileUrl = function () {
+    return tdtUrl + "mapservice/GetTiles?lxys={z},{x},{y}&tk=" + token;
+  };
+
+  wtfs.getIcoUrl = function () {
+    return tdtUrl + "mapservice/GetIcon?id={id}&tk=" + token;
+  };
+
+  wtfs.initTDT([
+    {
+      x: 6,
+      y: 1,
+      level: 2,
+      boundBox: { minX: 90, minY: 0, maxX: 135, maxY: 45 },
+    },
+    {
+      x: 7,
+      y: 1,
+      level: 2,
+      boundBox: { minX: 135, minY: 0, maxX: 180, maxY: 45 },
+    },
+    {
+      x: 6,
+      y: 0,
+      level: 2,
+      boundBox: { minX: 90, minY: 45, maxX: 135, maxY: 90 },
+    },
+    {
+      x: 7,
+      y: 0,
+      level: 2,
+      boundBox: { minX: 135, minY: 45, maxX: 180, maxY: 90 },
+    },
+    {
+      x: 5,
+      y: 1,
+      level: 2,
+      boundBox: { minX: 45, minY: 0, maxX: 90, maxY: 45 },
+    },
+    {
+      x: 4,
+      y: 1,
+      level: 2,
+      boundBox: { minX: 0, minY: 0, maxX: 45, maxY: 45 },
+    },
+    {
+      x: 5,
+      y: 0,
+      level: 2,
+      boundBox: { minX: 45, minY: 45, maxX: 90, maxY: 90 },
+    },
+    {
+      x: 4,
+      y: 0,
+      level: 2,
+      boundBox: { minX: 0, minY: 45, maxX: 45, maxY: 90 },
+    },
+    {
+      x: 6,
+      y: 2,
+      level: 2,
+      boundBox: { minX: 90, minY: -45, maxX: 135, maxY: 0 },
+    },
+    {
+      x: 6,
+      y: 3,
+      level: 2,
+      boundBox: { minX: 90, minY: -90, maxX: 135, maxY: -45 },
+    },
+    {
+      x: 7,
+      y: 2,
+      level: 2,
+      boundBox: { minX: 135, minY: -45, maxX: 180, maxY: 0 },
+    },
+    {
+      x: 5,
+      y: 2,
+      level: 2,
+      boundBox: { minX: 45, minY: -45, maxX: 90, maxY: 0 },
+    },
+    {
+      x: 4,
+      y: 2,
+      level: 2,
+      boundBox: { minX: 0, minY: -45, maxX: 45, maxY: 0 },
+    },
+    {
+      x: 3,
+      y: 1,
+      level: 2,
+      boundBox: { minX: -45, minY: 0, maxX: 0, maxY: 45 },
+    },
+    {
+      x: 3,
+      y: 0,
+      level: 2,
+      boundBox: { minX: -45, minY: 45, maxX: 0, maxY: 90 },
+    },
+    {
+      x: 2,
+      y: 0,
+      level: 2,
+      boundBox: { minX: -90, minY: 45, maxX: -45, maxY: 90 },
+    },
+    {
+      x: 0,
+      y: 1,
+      level: 2,
+      boundBox: { minX: -180, minY: 0, maxX: -135, maxY: 45 },
+    },
+    {
+      x: 1,
+      y: 0,
+      level: 2,
+      boundBox: { minX: -135, minY: 45, maxX: -90, maxY: 90 },
+    },
+    {
+      x: 0,
+      y: 0,
+      level: 2,
+      boundBox: { minX: -180, minY: 45, maxX: -135, maxY: 90 },
+    },
+  ]);
+};
+const createCityBadge = async () => {
+  viewer.dataSources.add(
+    Cesium.GeoJsonDataSource.load("/json/China.json", {
+      stroke: Cesium.Color.WHITE,
+      fill: Cesium.Color.RED.withAlpha(0.5),
+      strokeWidth: 5,
+    })
+  );
+
+  // 2、分色渲染行政区
+  Cesium.GeoJsonDataSource.load("/json/China.json").then(function (dataSource) {
+    viewer.dataSources.add(dataSource);
+    const entities = dataSource.entities.values;
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      // 构造随机颜色
+      const color = Cesium.Color.fromRandom({ alpha: 0.6 });
+      entity.polygon.material = color;
+      entity.polygon.outline = false;
+    }
+  });
+
+  Cesium.GeoJsonDataSource.load("/json/GuangZhou.json").then((dataSource) => {
+    viewer.dataSources.add(dataSource);
+    const entities = dataSource.entities.values;
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      // 得到每块多边形的坐标集合
+      const polyPositions = entity.polygon.hierarchy.getValue(
+        Cesium.JulianDate.now()
+      ).positions;
+      // 根据坐标集合构造BoundingSphere获取中心点坐标
+      let polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
+      // 将中心点拉回到地球表面
+      polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeodeticSurface(polyCenter);
+
+      const color = Cesium.Color.fromRandom({ alpha: 0.6 });
+      viewer.entities.add({
+        position: polyCenter,
+        label: {
+          text: entity.properties.name,
+          // showBackground: true, //背景颜色
+          // scale: 0.6,
+          verticalOrigin: Cesium.VerticalOrigin.CENTER, // 垂直位置
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // 水平位置
+          font: "14pt Source Han Sans CN", // 字体样式
+          fillColor: Cesium.Color.BLACK, // 字体颜色
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 5,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          eyeOffset: new Cesium.Cartesian3(0, 0, -80000), // 这里设置了就不会被遮盖了，设为负值则在更上层
+        },
+      });
+    }
+  });
+  const position = Cesium.Cartesian3.fromDegrees(113.45475285674296,22.233013647304126, 160000);
+
+  viewer.camera.flyTo({
           destination: position,
           orientation: {
             heading: Cesium.Math.toRadians(0),
@@ -64,22 +370,6 @@ const initMap = () => {
             roll: 0,
           },
         });
-        createCityBadge();
-        create3DBar();
-        isLoading = true;
-      }
-    }
-  });
-};
-
-const createCityBadge = async () => {
-  const geoJSON = Cesium.GeoJsonDataSource.load("/json/GuangZhou.json", {
-    stroke: Cesium.Color.fromCssColorString("#ffffff"),
-    fill: Cesium.Color.fromCssColorString("#ffffff").withAlpha(0.2),
-    strokeWidth: 3,
-  });
-  console.log(viewer, "viewer");
-  const polyliner = viewer.dataSources.add(geoJSON);
 };
 
 const create3DBar = (west, south, east, north) => {
@@ -127,17 +417,20 @@ const create3DBar = (west, south, east, north) => {
   }
 
   viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
-    // var pickedObject = viewer.scene.pick(movement.position);
-    var pickedObject = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
-    console.log(pickedObject,'a')
+    // let pickedObject = viewer.scene.pick(movement.position);
+    let pickedObject = viewer.camera.pickEllipsoid(
+      movement.position,
+      viewer.scene.globe.ellipsoid
+    );
+    console.log(pickedObject, "a");
     // const cartesian = viewer.camera.pickEllipsoid(
     //     movement.endPosition,
     //     scene.globe.ellipsoid
     //   );
     if (Cesium.defined(pickedObject) && pickedObject.id) {
-      var entity = pickedObject.id;
-      var tooltip = entity.name;
-      var cartesian = viewer.camera.pickEllipsoid(
+      let entity = pickedObject.id;
+      let tooltip = entity.name;
+      let cartesian = viewer.camera.pickEllipsoid(
         movement.position,
         viewer.scene.globe.ellipsoid
       );
@@ -159,6 +452,8 @@ const create3DBar = (west, south, east, north) => {
 
   viewer.zoomTo(viewer.entities);
 };
+
+const showAdministrative = () => {};
 onMounted(() => {
   initMap();
 });

@@ -7,17 +7,20 @@ import {
 
 export const router = createRouter({
     routes: [{
-            path: '/',
-            redirect: '/cityScene',
-            component: () => import('@/layout/index.vue'),
-            children:[
-                {
-                    path:"cityScene",
-                    component: () => import('@/pages/cityScene/index.vue')
-                }
-            ]
-        },
-    ],
+        path: '/',
+        redirect: '/cityScene',
+        component: () => import('@/layout/index.vue'),
+        children: [{
+            path: "cityScene",
+            component: () => import('@/pages/cityScene/index.vue')
+        }, {
+            path: "cityRegion",
+            component: () => import('@/pages/cityRegion/index.vue')
+        }, {
+            path: "cityTraffic",
+            component: () => import('@/pages/cityTraffic/index.vue')
+        }]
+    }, ],
     history: createWebHashHistory()
 })
 
