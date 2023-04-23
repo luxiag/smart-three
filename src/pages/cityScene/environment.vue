@@ -85,6 +85,26 @@ const init3DMap = async () => {
 
 const layer = ref(1);
 
+const addBoundaryWall = () => {
+      // 绘制墙体的数据，将多维数组转成一维数组
+      let coordinates = this.flatten(geojson.features[0].geometry.coordinates[0])
+    // 因为地图影像数据是贴地的，所以给个墙的高度设为负数则会有厚度的感觉
+    // 墙体最高为0
+    let maximumHeights = new Array(coordinates.length).fill(0)
+    // 墙体最低为-1600
+    let minimumHeights = new Array(coordinates.length).fill(-1600)
+    let position = Cesium.Cartesian3.fromDegreesArray(coordinates)
+    window.viewer.entities.add({
+        id: 'wall',
+        wall: {
+            positions: position,
+            maximumHeights: maximumHeights,
+            minimumHeights: minimumHeights,
+            material: Cesium.Color.fromCssColorString("rgba(0,255,255,0.3)")
+        }
+    })
+}
+
 const initMap = async () => {
   mapChart = echarts.init(mapRef.value);
   mapChart.showLoading();
