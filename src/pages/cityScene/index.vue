@@ -1,16 +1,23 @@
 <template>
   <container>
-    <template v-slot:left></template>
+    <template v-slot:left>
+
+      
+    </template>
     <template v-slot:left-use>
       <div
-        :class="activeCompName == 'environment' ? 'use active' : 'use'"
-        @click="switchComponent('environment')"
+        :class="
+          activeCompName == 'administrativePlanning' ? 'use active' : 'use'
+        "
+        @click="switchComponent('administrativePlanning')"
       >
         行政规划
       </div>
       <div
-        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
-        @click="switchComponent('regionalPopulation')"
+        :class="
+          activeCompName == 'populationDistribution' ? 'use active' : 'use'
+        "
+        @click="switchComponent('populationDistribution')"
       >
         人口分布
       </div>
@@ -37,15 +44,15 @@
 </template>
 <script setup>
 import environment from "./components/environment.vue";
-import regionalPopulation from "./components/regionalPopulation.vue";
-import terrain from "./components/terrain.vue";
+import administrativePlanning from "./components/administrativePlanning.vue";
+import populationDistribution from "./components/populationDistribution.vue";
 import container from "@/components/container.vue";
 
 const activeCompName = ref("terrain");
 const activeComponent = {
   environment,
-  regionalPopulation,
-  terrain,
+  administrativePlanning,
+  populationDistribution,
 };
 
 const switchComponent = (componentName) => {

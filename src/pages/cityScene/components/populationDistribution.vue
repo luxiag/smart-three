@@ -38,7 +38,6 @@ const initScene = () => {
   const light = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
   scene.add(light);
 
-
   renderer = new THREE.WebGLRenderer();
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.BasicShadowMap;
@@ -74,8 +73,8 @@ const initMap = (jsonData) => {
     }
     map.add(region);
   });
-  map.scale.set(10,10,10)
-  console.log(map)
+  map.scale.set(10, 10, 10);
+  console.log(map);
   scene.add(map);
 };
 
@@ -102,7 +101,7 @@ const drawExtrudeMesh = (polygon, color, projection) => {
   });
   const randomColor = (0.5 + Math.random() * 0.5) * 0xffffff;
   const material = new THREE.MeshBasicMaterial({
-    color: randomColor,
+    color: "#205977",
     transparent: true,
     opacity: 0.5,
     // wireframe:true
