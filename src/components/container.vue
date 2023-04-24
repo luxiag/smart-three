@@ -1,7 +1,12 @@
 <template>
   <div class="screen">
     <div class="screen-left">
-      <slot name="left"></slot>
+      <div class="left-container">
+        <slot name="left"></slot>
+      </div>
+      <div class="use-list">
+        <slot name="left-use"></slot>
+      </div>
     </div>
     <div class="screen-right">
       <slot name="right"></slot>
@@ -20,6 +25,12 @@
   .screen-center {
     width: 100%;
     height: 100%;
+    position: relative;
+  }
+  .screen-left {
+    padding-top: 90px;
+    position: absolute;
+    z-index: 11;
   }
 }
 </style>

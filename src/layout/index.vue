@@ -7,19 +7,34 @@
     </div>
     <div class="btn-func">
       <div class="btn">
-        <button  @click="goPage('cityScene')" :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'">城市全景</button>
+        <button
+          @click="goPage('cityScene')"
+          :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'"
+        >
+          城市全景
+        </button>
       </div>
-      <div class="btn"><button class="class-btn active">城市交通</button></div>
       <div class="btn">
         <button
-          :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'"
+          @click="goPage('cityPlan')"
+          :class="route.path == '/cityPlan' ? 'class-btn active' : 'class-btn'"
         >
           城市规划
         </button>
       </div>
       <div class="btn">
         <button
-        @click="goPage('cityTraffic')"
+          @click="goPage('cityManage')"
+          :class="
+            route.path == '/cityManage' ? 'class-btn active' : 'class-btn'
+          "
+        >
+          智慧管理
+        </button>
+      </div>
+      <div class="btn">
+        <button
+          @click="goPage('cityTraffic')"
           :class="
             route.path == '/cityTraffic' ? 'class-btn active' : 'class-btn'
           "

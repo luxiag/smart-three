@@ -3,22 +3,28 @@
     <template v-slot:left></template>
     <template v-slot:left-use>
       <div
-        :class="activeCompName == 'environment' ? 'use active' : 'use'"
-        @click="switchComponent('environment')"
+        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
+        @click="switchComponent('regionalPopulation')"
       >
-        行政规划
+        用地总览
       </div>
       <div
         :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
         @click="switchComponent('regionalPopulation')"
       >
-        人口分布
+        地形概况
+      </div>
+      <div
+        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
+        @click="switchComponent('regionalPopulation')"
+      >
+        珠三角经济带
       </div>
       <div
         :class="activeCompName == 'terrain' ? 'use active' : 'use'"
         @click="switchComponent('terrain')"
       >
-        生态环境
+        粤港澳经济
       </div>
     </template>
     <template v-slot:right> </template>
@@ -26,30 +32,13 @@
       <component :is="activeComponent[activeCompName]"></component>
     </template>
   </container>
-  <!-- <div class="left">
-    <div class="left-container"></div>
-    <div class="use-list">
-
-    </div>
-  </div>
-  <div class="right"></div>
-  <div class="center"></div> -->
 </template>
 <script setup>
-import environment from "./components/environment.vue";
-import regionalPopulation from "./components/regionalPopulation.vue";
-import terrain from "./components/terrain.vue";
 import container from "@/components/container.vue";
 
-const activeCompName = ref("terrain");
-const activeComponent = {
-  environment,
-  regionalPopulation,
-  terrain,
-};
+const activeCompName = ref("");
+const activeComponent = {};
 
-const switchComponent = (componentName) => {
-  activeCompName.value = componentName;
-};
+const switchComponent = (componentName) => {};
 </script>
 <style scoped lang="less"></style>
