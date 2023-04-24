@@ -23,8 +23,11 @@ const initScene = () => {
     1,
     10000
   );
-  camera.position.set( 148.44641651545723, 
-67.87411899908022, -92.90173497667669);
+  camera.position.set(
+    148.44641651545723,
+    67.87411899908022,
+    -92.90173497667669
+  );
   // {x: -43.32489051735817, y: 44.15707727029659, z: 203.7138370565122}
   scene.add(camera);
   // scene.background = new THREE.Color(0xbbbbbb);
@@ -47,16 +50,14 @@ const initScene = () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   floodingAnalysisRef.value.appendChild(renderer.domElement);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.addEventListener("change", render); // use if there is no animation loop
   // controls.minDistance = 400;
   // controls.maxDistance = 1000;
   controls.target.set(0, 0, 0);
   controls.update();
   window.addEventListener("resize", onWindowResize);
   window.onclick = function () {
-    console.log("a", camera.position,controls);
-    controlWaterPlane()
+    console.log("a", camera.position, controls);
+    controlWaterPlane();
   };
 };
 
@@ -92,8 +93,6 @@ const createSky = () => {
   renderTarget = pmremGenerator.fromScene(sky);
 
   scene.environment = renderTarget.texture;
-
- 
 };
 
 const createWater = () => {
@@ -118,8 +117,8 @@ const createWater = () => {
 };
 
 const controlWaterPlane = () => {
-   water.position.y += water.position.y+5
-}
+  water.position.y += water.position.y + 5;
+};
 
 const createControl = () => {
   controls = new OrbitControls(camera, renderer.domElement);

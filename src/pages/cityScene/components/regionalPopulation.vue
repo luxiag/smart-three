@@ -30,9 +30,9 @@ const initMap = () => {
     // 是否显示帮助按钮
     navigationHelpButton: false,
     shouldAnimate: true,
-    selectionIndicator: true,
+    selectionIndicator: false,
     // 是否播放动画
-    animation: true,
+    animation: false,
     // 是否显示时间轴
     timeline: false,
     // 是否显示全屏按钮
@@ -40,7 +40,6 @@ const initMap = () => {
     selectionIndicator: false, // 隐藏指示器
   });
   viewer.cesiumWidget.creditContainer.style.display = "none";
-
   // createGeographicName();
   // viewer.cesiumWidget.selectionIndicatorContainer.style.display = "none";
   const tdt_tk = "f901e2c576a572b55ae86d623207d9ef";
@@ -86,7 +85,6 @@ const initMap = () => {
     if (viewer.scene.globe.tilesLoaded === true) {
       console.log("地球加载完成！");
       if (!isLoading) {
-
         createCityBadge();
         // create3DBar();
         isLoading = true;
@@ -357,20 +355,116 @@ const createCityBadge = async () => {
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
           eyeOffset: new Cesium.Cartesian3(0, 0, -80000), // 这里设置了就不会被遮盖了，设为负值则在更上层
         },
+        description: function () {
+          return "<h3>description</h3>";
+        },
       });
     }
   });
-  const position = Cesium.Cartesian3.fromDegrees(113.45475285674296,22.233013647304126, 160000);
+  const position = Cesium.Cartesian3.fromDegrees(
+    113.45475285674296,
+    22.233013647304126,
+    160000
+  );
 
   viewer.camera.flyTo({
-          destination: position,
-          orientation: {
-            heading: Cesium.Math.toRadians(0),
-            pitch: Cesium.Math.toRadians(-60),
-            roll: 0,
-          },
-        });
+    destination: position,
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-60),
+      roll: 0,
+    },
+  });
+  addMouseMoveEvent();
 };
+const districts = [
+  "越秀区",
+  "荔湾区",
+  "海珠区",
+  "天河区",
+  "白云区",
+  "黄埔区",
+  "番禺区",
+  "花都区",
+  "南沙区",
+  "增城区",
+  "从化区",
+];
+
+
+// 添加鼠标移入时间
+const addMouseMoveEvent = () => {
+  tooltipDiv.initTool(viewer.cesiumWidget.container);
+  const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(function (movement) {
+    var pickedObject = viewer.scene.pick(movement.endPosition);
+    if (
+      Cesium.defined(pickedObject) &&
+      pickedObject.id instanceof Cesium.Entity &&
+      districts.includes(pickedObject.id.name)
+    ) {
+      console.log("Entity Name: " + pickedObject.id.name, pickedObject);
+      tooltipDiv.showAt(
+        movement.endPosition,
+        `<div class="tooltip-element">
+      <div class="name">${pickedObject.id.name}</div>
+      <div class="container">
+        内容  
+      </div>
+    </div>`
+      );
+    } else {
+      tooltipDiv.setVisible(false);
+    }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+};
+
+const tooltipDiv = (function () {
+  var isInit = false;
+
+  function _() {}
+
+  _.initTool = function (frameDiv) {
+    if (isInit) {
+      return;
+    }
+
+    var div = document.createElement("DIV");
+    div.className = "tooltipdiv";
+
+    var title = document.createElement("DIV");
+    title.className = "tooltipdiv-inner";
+    div.appendChild(title);
+
+    this._div = div;
+    this._title = title;
+
+    frameDiv.appendChild(div);
+
+    isInit = true;
+  };
+
+  _.setVisible = function (visible) {
+    if (!isInit) {
+      return;
+    }
+    this._div.style.display = visible ? "block" : "none";
+  };
+
+  _.showAt = function (position, message) {
+    if (!isInit) {
+      return;
+    }
+    if (position && message) {
+      this.setVisible(true);
+      this._title.innerHTML = message;
+      this._div.style.left = position.x + 10 + "px";
+      this._div.style.top = position.y - this._div.clientHeight / 2 + "px";
+    }
+  };
+
+  return _;
+})();
 
 const create3DBar = (west, south, east, north) => {
   const data = [
@@ -467,5 +561,31 @@ onMounted(() => {
     width: 100%;
     height: 100%;
   }
+}
+
+:deep(.tooltipdiv) {
+  display: block;
+  position: absolute;
+  visibility: visible;
+  max-width: 200px;
+  min-width: 100px;
+  padding: 1px 1px1px 25px;
+  font-size: 11px;
+  z-index: 1000;
+  opacity: 0.8;
+  -khtml-opacity: 0.8;
+  -moz-opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+.tooltipdiv-inner {
+  padding: 3px8px;
+  background-color: #000000;
+  color: white;
+  text-align: center;
+  max-width: 200px;
+  text-decoration: none;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
 </style>

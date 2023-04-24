@@ -14,6 +14,12 @@
       >
         生态环境
       </div>
+      <div
+        :class="activeCompName == 'terrain' ? 'use active' : 'use'"
+        @click="switchComponent('terrain')"
+      >
+        分析
+      </div>
     </div>
   </div>
   <div class="right"></div>
@@ -22,12 +28,14 @@
   </div>
 </template>
 <script setup>
-import environment from "./environment.vue";
-import regionalPopulation from "./regionalPopulation.vue";
-const activeCompName = ref("regionalPopulation");
+import environment from "./components/environment.vue";
+import regionalPopulation from "./components/regionalPopulation.vue";
+import terrain from "./components/terrain.vue";
+const activeCompName = ref("terrain");
 const activeComponent = {
   environment,
   regionalPopulation,
+  terrain,
 };
 
 const switchComponent = (componentName) => {
