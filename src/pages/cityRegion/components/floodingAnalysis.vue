@@ -50,10 +50,6 @@ const initScene = () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   floodingAnalysisRef.value.appendChild(renderer.domElement);
 
-  // controls.minDistance = 400;
-  // controls.maxDistance = 1000;
-  controls.target.set(0, 0, 0);
-  controls.update();
   window.addEventListener("resize", onWindowResize);
   window.onclick = function () {
     console.log("a", camera.position, controls);
