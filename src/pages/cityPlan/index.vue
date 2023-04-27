@@ -3,8 +3,8 @@
     <template v-slot:left></template>
     <template v-slot:left-use>
       <div
-        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
-        @click="switchComponent('regionalPopulation')"
+        :class="activeCompName == 'landUse' ? 'use active' : 'use'"
+        @click="switchComponent('landUse')"
       >
         用地总览
       </div>
@@ -35,10 +35,13 @@
 </template>
 <script setup>
 import container from "@/components/container.vue";
+import landUse from "./components/landUse.vue";
 
-const activeCompName = ref("");
-const activeComponent = {};
+const activeCompName = ref("landUse");
+const activeComponent = {landUse};
 
-const switchComponent = (componentName) => {};
+const switchComponent = (componentName) => {
+  
+};
 </script>
 <style scoped lang="less"></style>

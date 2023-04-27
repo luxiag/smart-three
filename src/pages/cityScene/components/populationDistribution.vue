@@ -8,11 +8,17 @@ import * as THREE from "three";
 import { onMounted } from "vue";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as d3 from "d3";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/addons/renderers/CSS2DRenderer.js";
 
 const loader = new THREE.FileLoader();
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, labelRenderer;
 const map = new THREE.Object3D();
+
+let cities = [];
 
 const getMapData = () => {
   loader.load("/json/GuangZhou.json", (data) => {
@@ -33,7 +39,7 @@ const initScene = () => {
     1,
     10000
   );
-  camera.position.set(0, 0, 100);
+  camera.position.set(-5, 0, 50);
   // scene.background = new THREE.Color(0xff00ff);
   scene.add(camera);
 
@@ -49,12 +55,29 @@ const initScene = () => {
   renderer.setClearColor(0xffffff, 0);
   geoMapRef.value.appendChild(renderer.domElement);
   renderer.render(scene, camera);
-  window.addEventListener('resize',onWindowResize)
+  window.addEventListener("resize", onWindowResize);
 };
 const onWindowResize = () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.render()
-}
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+
+  renderer.render();
+};
+const guangzhouPopulation = {
+  白云区: 1487000,
+  天河区: 1413000,
+  海珠区: 927000,
+  荔湾区: 826000,
+  越秀区: 1286000,
+  黄埔区: 813000,
+  番禺区: 1529000,
+  花都区: 1068000,
+  南沙区: 604000,
+  从化区: 655000,
+  增城区: 673000,
+};
 const initMap = (jsonData) => {
   const features = jsonData.features;
   const projection = d3
@@ -70,14 +93,23 @@ const initMap = (jsonData) => {
     const color = COLOR_ARR[index % COLOR_ARR.length];
     const region = new THREE.Object3D();
     region.properties = feature.properties;
+
+    const city = region.properties;
+    city.location = projection(city.center);
+    cities.push(city);
+
     const coordinates = feature.geometry.coordinates;
     if (feature.geometry.type === "MultiPolygon") {
       coordinates.forEach((coordinate) => {
         coordinate.forEach((rows) => {
           const mesh = drawExtrudeMesh(rows, color, projection);
           mesh.properties = feature.properties;
+          const cityName = feature.properties.name;
+          const peopleTotal = guangzhouPopulation[cityName];
+          const zScale = peopleTotal / 604000;
+          mesh.scale.set(1, 1, zScale);
           if (index % 2 === 0) {
-            mesh.scale.set(1, 1, 1.2);
+            // mesh.scale.set(1, 1, 1.2);
           }
           region.add(mesh);
         });
@@ -85,10 +117,106 @@ const initMap = (jsonData) => {
     }
     map.add(region);
   });
+  console.log(cities, "properties");
   map.scale.set(10, 10, 10);
+  // map.rotation.z = Math.PI/2
   scene.add(map);
   createPlayGround();
   createLight();
+  createLine();
+  createPeopleTotalLabel();
+  window.addEventListener("mousemove", raycasterMouseMove);
+};
+
+let raycaster = new THREE.Raycaster();
+let oldRegionObj, oldColor;
+let pointer = new THREE.Vector2();
+
+const raycasterMouseMove = (event) => {
+  pointer.set(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+  raycaster.setFromCamera(pointer, camera);
+
+  const intersects = raycaster.intersectObjects(map.children, true);
+  // console.log(intersects,'intersects')
+
+  oldRegionObj && oldRegionObj.material[0].color.set(oldColor);
+  if (intersects.length > 0) {
+    let regionObj = intersects[0].object;
+    if (regionObj.properties) {
+      oldRegionObj = regionObj;
+      oldColor = regionObj.material[0].color;
+      regionObj.material[0].color = new THREE.Color(0xffaa00);
+      render();
+    }
+  }
+};
+
+const barGroup = new THREE.Group();
+const labelGroup = new THREE.Group();
+const createPeopleTotalLabel = () => {
+  labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = "absolute";
+  labelRenderer.domElement.style.top = "0px";
+  labelRenderer.domElement.style.left = "0px";
+  geoMapRef.value.appendChild(labelRenderer.domElement);
+  controls = new OrbitControls(camera, labelRenderer.domElement);
+  cities.forEach((ite) => {
+    const pos = ite.location;
+
+    const cylinderGeometry = new THREE.CylinderGeometry(
+      0.15,
+      0.15,
+      5,
+      32,
+      1,
+      true
+    );
+    cylinderGeometry.rotateX(Math.PI / 2);
+    cylinderGeometry.translate(0, 0, 1);
+
+    const cylinderMaterial = new THREE.MeshBasicMaterial({
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+    });
+    const cylinderMesh = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+
+    cylinderMesh.position.set(pos[0] * 10, -pos[1] * 10, 2);
+    barGroup.add(cylinderMesh);
+    console.log(ite, "ite");
+    const div = document.createElement("div");
+    div.innerHTML = `
+     <div class="label-container">
+        <h3>${ite.name}</h3>
+        <p>人口：${(guangzhouPopulation[ite.name] / 1000).toFixed(2)} 万人</p>
+      </div>
+    `;
+    div.className = "label-population";
+    const label = new CSS2DObject(div);
+    label.position.set(pos[0] * 10, -pos[1] * 10, 7);
+    labelGroup.add(label);
+
+    // div.innerHTML = item
+  });
+  scene.add(labelGroup);
+  scene.add(barGroup);
+};
+
+const createLine = () => {
+  // const geometry = new THREE.BoxGeometry(1, 1, 10);
+  // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  // const cube = new THREE.Mesh(geometry, material);
+  // const city = cities[7];
+
+  const axesHelper = new THREE.AxesHelper(50);
+  scene.add(axesHelper);
+
+  // cube.position.x = city.location[0] * 10;
+  // cube.position.y = -city.location[1] * 10;
+  // scene.add(cube);
 };
 
 const createPlayGround = () => {
@@ -124,7 +252,7 @@ const createLight = () => {
   light.shadow.mapSize.height = 1024;
 
   // 半球光
-  let hemiLight = new THREE.HemisphereLight("#80edff", "#75baff", 0.3);
+  let hemiLight = new THREE.HemisphereLight("#80edff", "#75baff", 0.6);
   // 这个也是默认位置
   hemiLight.position.set(20, -50, 0);
   scene.add(hemiLight);
@@ -222,7 +350,9 @@ const animate = () => {
 
 const render = () => {
   controls.update();
+
   renderer.render(scene, camera);
+  labelRenderer&&labelRenderer.render(scene, camera);
 };
 
 onMounted(() => {
@@ -240,6 +370,50 @@ onMounted(() => {
   .geoMap {
     width: 100%;
     height: 100%;
+  }
+}
+:deep(.geoMap) {
+  .label-population {
+    .label-container {
+      background-color: rgba(20, 143, 221, 0.68);
+      box-shadow: 0 0 12px rgba(0, 128, 255, 0.75);
+      border: 1px solid rgba(127, 177, 255, 0.75);
+      padding: 5px;
+      font-size: 12px;
+      color: #efefef;
+      h3 {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0;
+        text-align: center;
+      }
+      p {
+        margin: 5px;
+      }
+    }
+    // &::before {
+    //   content: "";
+    //   display: block;
+    //   position: absolute;
+    //   width: 100px;
+    //   height: 1px;
+    //   background: rgb(127 177 255 / 75%);
+    //   bottom: 0;
+    //   right: -100px;
+    //   transform: rotate(30deg);
+    //   transform-origin: 0 0;
+    // }
+    // &::after {
+    //   content: "";
+    //   display: block;
+    //   position: absolute;
+    //   width: 20px;
+    //   height: 20px;
+    //   border-radius: 50%;
+    //   background: rgb(127 177 255 / 75%);
+    //   bottom: -65px;
+    //   right: -105px;
+    // }
   }
 }
 </style>

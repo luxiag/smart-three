@@ -48,7 +48,7 @@ import administrativePlanning from "./components/administrativePlanning.vue";
 import populationDistribution from "./components/populationDistribution.vue";
 import container from "@/components/container.vue";
 
-const activeCompName = ref("terrain");
+const activeCompName = ref("populationDistribution");
 const activeComponent = {
   environment,
   administrativePlanning,
