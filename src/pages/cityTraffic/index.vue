@@ -33,6 +33,11 @@ import container from "@/components/container.vue";
 const activeCompName = ref("");
 const activeComponent = {};
 
+
+
+
+
+
 const switchComponent = (componentName) => {};
 </script>
 <style scoped lang="less"></style>
