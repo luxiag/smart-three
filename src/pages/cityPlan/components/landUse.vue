@@ -4,23 +4,30 @@
   </div>
 </template>
 <script setup>
+import "ol/ol.css";
 import Map from "ol/Map";
 import View from "ol/View";
-import { Vector as VectorLayer } from "ol/layer";
+import VectorLayer from "ol/layer/Vector.js";
 import { Vector as VectorSource } from "ol/source";
-import { Fill, Stroke, Style } from "ol/style";
+import { Fill, Stroke, Style, RegularShape } from "ol/style";
 import * as proj from "ol/proj";
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 import { GeoJSON } from "ol/format";
 import { fromExtent } from "ol/geom/Polygon";
+import Polygon from "ol/geom/Polygon.js";
 import LineString from "ol/geom/LineString.js";
+import LinearRing from "ol/geom/LinearRing.js";
 import Feature from "ol/Feature.js";
+import Point from "ol/geom/Point.js";
 import Mask from "ol-ext/filter/Mask";
+import Crop from "ol-ext/filter/Crop"
+import MultiPolygon from 'ol/geom/MultiPolygon.js';
 import { onMounted } from "vue";
-import GuangZhouBoundaryJSON from "public/json/GuangZhouBoundary.json";
-
+import GuangZhouBoundaryJSON from "@/assets/json/GuangZhouBoundary.json";
 let map, layers, maskLayer, reverseLayer;
+
+const stroke = new Stroke({ color: "black", width: 1 });
 
 const initMap = () => {
   layers = [
@@ -34,129 +41,102 @@ const initMap = () => {
     target: "land-use-container",
     layers,
     view: new View({
+      projection: "EPSG:4326",
       center: proj.fromLonLat([113.264434, 23.129162]),
       zoom: 13,
     }),
   });
-    createMapMask();
+  console.log(map,'map')
+  // createLineHeight();
+  // createMapMask();
+};
+
+const erase = (geom) => {
+  console.log(geom, "geom");
+  const extent = [-180, -90, 180, 90];
+  const polygonRing = fromExtent(extent);
+  if (!geom instanceof Polygon) {
+    console.log("geom的类型必须是Polygon");
+    return;
+  }
+  const coords = geom.getCoordinates();
+  coords.forEach((coord) => {
+    const linearRing = new LinearRing(coord[0]);
+    polygonRing.appendLinearRing(linearRing);
+  });
+  return polygonRing;
+};
+const createLineHeight = () => {
+  const guangzhouSource = new VectorSource({
+    features: new GeoJSON().readFeatures(GuangZhouBoundaryJSON),
+  });
+  const lineLayer = new VectorLayer({
+    zIndex: 3,
+    source: guangzhouSource,
+    style: new Style({
+      fill: new Fill({
+        color: "rgba(0, 0, 0, 0)", // 透明色
+      }),
+      stroke: new Stroke({
+        color: "#f4b49f",
+        width: 3,
+      }),
+    }),
+  });
+  map.addLayer(lineLayer);
+};
+const createMapMask1 = () => {
+  const maskLayer = new VectorLayer({
+    zIndex: 3,
+    source: new VectorSource(),
+    style: new Style({
+      fill: new Fill({
+        color: "rgba( 255, 255, 255, 0)",
+      }),
+      stroke: new Stroke({
+        color: "#f4b49f",
+        width: 3,
+      }),
+    }),
+  });
+  map.addLayer(maskLayer);
+  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0].geometry;
+  const ft = new GeoJSON().readFeatures(GuangZhouBoundaryJSON);
+  const convertGeom = erase(ft[0].getGeometry());
+  const convertFt = new Feature({ geometry: convertGeom });
+  maskLayer.getSource().addFeature(convertFt);
 };
 
 const createMapMask = () => {
-//   let geoJson = new GeoJSON();
-//   const GuangZhouFeatures = GuangZhouBoundaryJSON.features[0];
-//   //获取边界数据MultiPolygon数组
-//   let ft = geoJson
-//     .readFeature(GuangZhouFeatures)
-//     .getGeometry()
-//     .getGeometries();
-//   console.log(ft, "ft");
-//   console.log(ft);
-//   //获取绘制边界数据的数组，我的是数组中的第一个所以取[1]
-//   let linearRing = new Polygon(ft[0].getCoordinates()[1]);
-//   // 全球范围（太卡 抛弃）改取当前视窗的范围
-//   // let extent = [-180, -90, 180, 90];
-//   // let polygonRing = fromExtent(linearRing.getExtent());获取Polygon的范围，太小因此改用视窗范围
-//   //获取当前窗口的范围
-//   let extent = map.getView().calculateExtent();
-//   //不想看到视窗外部线条因此做了计算
-//   for (let i = 0; i < extent.length; i++) {
-//     extent[0] = extent[0] - 0.04; //左
-//     extent[1] = extent[1] - 0.04; //下
-//     extent[2] = extent[2] + 0.04; //右
-//     extent[3] = extent[3] + 0.04; //上
-//   }
-//   //针对视窗范围设置Extent
-//   let polygonRing = fromExtent(extent);
-//   //把视窗范围添加至边界线中也就是确定外环位置
-//   polygonRing.appendLinearRing(linearRing);
-//   //把数据生成Feature
-//   let Polygons = new Feature({
-//     geometry: polygonRing,
-//   });
-//   //实例化一个矢量图层Vector作为绘制层
-//   let vectorSource = new VectorSource({
-//     features: [Polygons],
-//     // features: geoJson.readFeatures(area),
-//   });
-
-//   //创建一个图层并设置填充样式
-//   let vector = new VectorLayer({
-//     source: vectorSource,
-//     style: new Style({
-//       fill: new Fill({
-//         color: "rgba(255,255,255,0.7)",
-//       }),
-//       stroke: new Stroke({
-//         lineDash: [1, 2, 3, 4, 5],
-//         color: "#ffcc33",
-//         width: 4,
-//       }),
-//     }),
-//   });
-//   //设置图层层级
-//   vector.setZIndex(0);
-//   //添加至地图
-//   map.addLayer(vector);
-  // 创建一个多边形，用于遮罩广州以外的所有城市
-  //
-
-  //   console.log(
-  //     new GeoJSON().readFeature(GuangZhouFeature, {
-  //       dataProjection: "EPSG:4326", // json的坐标系
-  //       featureProjection: "EPSG:3857", // 当前地图使用的坐标系
-  //     }),
-  //     "gz"
-  //   );
-  //   var mask = new VectorLayer({
-  //     source: new VectorSource({
-  //       feature: new Feature({
-  //         geometry: new GeoJSON().readFeature(GuangZhouFeature, {
-  //           dataProjection: "EPSG:4326", // json的坐标系
-  //           featureProjection: "EPSG:3857", // 当前地图使用的坐标系
-  //         }),
-  //       }),
-  //     }),
-  //     style: new Style({
-  //       fill: new Fill({
-  //         color: "rgba(0, 0, 0, 0.5)",
-  //       }),
-  //       stroke: new Stroke({
-  //         color: "black",
-  //         width: 1,
-  //       }),
-  //     }),
-  //   });
-
-  //   // 将该遮罩层添加到地图中
-  //   map.addLayer(mask);
-
-  //   maskLayer = new VectorLayer({
-  //     source: new VectorSource(),
-  //     style: new Style({
-  //       stroke: new Stroke({
-  //         color: "rgb(144,30,252)",
-  //         width: 3,
-  //       }),
-  //       fill: new Fill({ color: "rgba(220,240,253,0.6)" }),
-  //     }),
-  //     zIndex: 9999,
-  //   });
-  //   maskLayer.setMap(map);
-
-  //   const GuangZhouFeature = GuangZhouBoundaryJSON.features[0];
-  //   console.log(GuangZhouFeature, "a");
-  //   const maskFilter = new Mask({
-  //     feature: new GeoJSON().readFeature(GuangZhouFeature, {
-  //       dataProjection: "EPSG:4326", // json的坐标系
-  //       featureProjection: "EPSG:3857", // 当前地图使用的坐标系
-  //     }),
-  //     wrapX: true,
-  //     inner: false,
-  //     fill: new Fill({ color: "rgba(220,240,253,0.6)" }),
-  //   });
-  //   console.log(maskFilter, "maskFilter");
-  //   maskLayer.addFilter(maskFilter);
-  //   map.addLayer(maskLayer);
+  maskLayer = new VectorLayer({
+    source: new VectorSource(),
+    style: new Style({
+      stroke: new Stroke({
+        color: "rgb(144,30,252)",
+        width: 3,
+      }),
+      fill: new Fill({ color: "rgba(220,240,253,0.6)" }),
+    }),
+    zIndex: 9999,
+  });
+  // maskLayer.setMap(map);
+  map.addLayer(maskLayer)
+  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0].geometry.coordinates;
+  console.log(GuangZhouFeature,'GuangZhouFeature')
+  const f = new Feature(new MultiPolygon(GuangZhouFeature))
+  const crop = new Crop({
+    feature:f,
+    wrapX:true,
+    inner:false
+  })
+  maskLayer.addFilter(crop)
+  const maskFilter = new Mask({
+    feature: f,
+    wrapX: true,
+    inner: false,
+    fill: new Fill({ color: "rgba(220,240,253,0.6)" }),
+  });
+  maskLayer.addFilter(maskFilter);
 };
 //反转遮罩：全图半透明遮罩，指定区域擦干净
 // 准备反转遮罩层
@@ -177,6 +157,7 @@ const addReverseLayer = () => {
   console.log(map, reverseLayer);
   reverseLayer.setZIndex(99);
   map.addLayer(reverseLayer);
+  draw()
 };
 /**
  * 开始操作
@@ -184,9 +165,11 @@ const addReverseLayer = () => {
  */
 const draw = () => {
   // 将data转换为feature
-  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0];
-  const dataForMart = new GeoJSON().readFeature(GuangZhouFeature);
-  console.log(dataForMart,'data')
+  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0].geometry.coordinates;
+  const f = new Feature(new geom.MultiPolygon(GuangZhouFeature))
+  const dataForMart = new GeoJSON().readFeatures(GuangZhouBoundaryJSON);
+  dataForMart.
+  console.log(dataForMart, "data");
   // 得到反转擦除后遮盖层数据
   const convertGeom = erase(dataForMart);
   const convertFt = new Feature({ geometry: convertGeom });
@@ -243,9 +226,8 @@ const createClip = (coords, canvas, type) => {
 
 onMounted(() => {
   initMap();
-  addReverseLayer();
-  draw();
-
+  // addReverseLayer();
+  // draw();
 });
 </script>
 

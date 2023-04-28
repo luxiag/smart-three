@@ -164,6 +164,7 @@ const createPeopleTotalLabel = () => {
   labelRenderer.domElement.style.left = "0px";
   geoMapRef.value.appendChild(labelRenderer.domElement);
   controls = new OrbitControls(camera, labelRenderer.domElement);
+  controls.maxDistance = 200
   cities.forEach((ite) => {
     const pos = ite.location;
 
