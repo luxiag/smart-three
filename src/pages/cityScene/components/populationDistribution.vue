@@ -14,6 +14,7 @@ import {
 } from "three/addons/renderers/CSS2DRenderer.js";
 
 const loader = new THREE.FileLoader();
+const teLoader = new THREE.TextureLoader()
 
 let scene, camera, renderer, controls, labelRenderer;
 const map = new THREE.Object3D();
@@ -164,14 +165,15 @@ const createPeopleTotalLabel = () => {
   labelRenderer.domElement.style.left = "0px";
   geoMapRef.value.appendChild(labelRenderer.domElement);
   controls = new OrbitControls(camera, labelRenderer.domElement);
-  controls.maxDistance = 200
+  controls.maxDistance = 200;
   cities.forEach((ite) => {
     const pos = ite.location;
-
+    const peopleTotal = guangzhouPopulation[ite.name];
+    const zScale = peopleTotal / 604000;
     const cylinderGeometry = new THREE.CylinderGeometry(
       0.15,
       0.15,
-      5,
+      4 * zScale,
       32,
       1,
       true
@@ -185,7 +187,7 @@ const createPeopleTotalLabel = () => {
     });
     const cylinderMesh = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
 
-    cylinderMesh.position.set(pos[0] * 10, -pos[1] * 10, 2);
+    cylinderMesh.position.set(pos[0] * 10, -pos[1] * 10, 2*zScale);
     barGroup.add(cylinderMesh);
     console.log(ite, "ite");
     const div = document.createElement("div");
@@ -197,7 +199,7 @@ const createPeopleTotalLabel = () => {
     `;
     div.className = "label-population";
     const label = new CSS2DObject(div);
-    label.position.set(pos[0] * 10, -pos[1] * 10, 7);
+    label.position.set(pos[0] * 10, -pos[1] * 10, 4 * zScale + 2);
     labelGroup.add(label);
 
     // div.innerHTML = item
@@ -221,6 +223,7 @@ const createLine = () => {
 };
 
 const createPlayGround = () => {
+
   const groundMaterial = new THREE.MeshStandardMaterial({
     color: 0x031837,
     // specular: 0x111111,
@@ -228,6 +231,7 @@ const createPlayGround = () => {
     roughness: 1,
     // opacity: 0.2,
     opacity: 0.5,
+    map:teLoader.load('/src/assets/img/background.png'),
     transparent: true,
   });
   const ground = new THREE.Mesh(
@@ -353,7 +357,7 @@ const render = () => {
   controls.update();
 
   renderer.render(scene, camera);
-  labelRenderer&&labelRenderer.render(scene, camera);
+  labelRenderer && labelRenderer.render(scene, camera);
 };
 
 onMounted(() => {

@@ -21,9 +21,13 @@ import LinearRing from "ol/geom/LinearRing.js";
 import Feature from "ol/Feature.js";
 import Point from "ol/geom/Point.js";
 import Mask from "ol-ext/filter/Mask";
-import Crop from "ol-ext/filter/Crop"
-import MultiPolygon from 'ol/geom/MultiPolygon.js';
+import Crop from "ol-ext/filter/Crop";
+import MultiPolygon from "ol/geom/MultiPolygon.js";
 import { onMounted } from "vue";
+import OSM from "ol/source/OSM.js";
+import Stamen from "ol/source/Stamen.js";
+import {defaults as defaultControls} from 'ol/control/defaults';
+// import TileLayer from 'ol/layer/Tile.js';
 import GuangZhouBoundaryJSON from "@/assets/json/GuangZhouBoundary.json";
 let map, layers, maskLayer, reverseLayer;
 
@@ -42,11 +46,14 @@ const initMap = () => {
     layers,
     view: new View({
       projection: "EPSG:4326",
-      center: proj.fromLonLat([113.264434, 23.129162]),
+      center: proj.fromLonLat([113.264434, 23.129162], "EPSG:4326"),
       zoom: 13,
     }),
+    attribution:false,
+    rotate:false,
+    zoom:false
   });
-  console.log(map,'map')
+  console.log(map, "map");
   // createLineHeight();
   // createMapMask();
 };
@@ -91,7 +98,7 @@ const createMapMask1 = () => {
     source: new VectorSource(),
     style: new Style({
       fill: new Fill({
-        color: "rgba( 255, 255, 255, 0)",
+        color: "rgba( 255, 255, 255, 0.5)",
       }),
       stroke: new Stroke({
         color: "#f4b49f",
@@ -108,6 +115,30 @@ const createMapMask1 = () => {
 };
 
 const createMapMask = () => {
+  var osm = new TileLayer({ source: new OSM() });
+  // The map
+  var map = new Map({
+    target: "land-use-container",
+    view: new View({
+      zoom: 10,
+      projection: "EPSG:4326",
+      center: proj.fromLonLat([113.264434, 23.129162], "EPSG:4326"),
+    }),
+    layers: [
+      new TileLayer({
+        // source: new Stamen({ layer: "watercolor" }),
+        source: new XYZ({
+          url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        }),
+      }),
+      osm,
+    ],
+    controls:defaultControls({
+      rotate:false,
+      zoom:false,
+      attribution:true
+    })
+  });
   maskLayer = new VectorLayer({
     source: new VectorSource(),
     style: new Style({
@@ -120,23 +151,25 @@ const createMapMask = () => {
     zIndex: 9999,
   });
   // maskLayer.setMap(map);
-  map.addLayer(maskLayer)
-  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0].geometry.coordinates;
-  console.log(GuangZhouFeature,'GuangZhouFeature')
-  const f = new Feature(new MultiPolygon(GuangZhouFeature))
+  // map.addLayer(maskLayer);
+
+  const GuangZhouFeature =
+    GuangZhouBoundaryJSON.features[0].geometry.coordinates;
+  console.log(GuangZhouFeature, "GuangZhouFeature");
+  const f = new Feature(new MultiPolygon(GuangZhouFeature));
   const crop = new Crop({
-    feature:f,
-    wrapX:true,
-    inner:false
-  })
-  maskLayer.addFilter(crop)
+    feature: f,
+    wrapX: true,
+    inner: false,
+  });
+  osm.addFilter(crop);
   const maskFilter = new Mask({
     feature: f,
     wrapX: true,
     inner: false,
-    fill: new Fill({ color: "rgba(220,240,253,0.6)" }),
+    fill: new Fill({ color: [255, 255, 255, 0.8] }),
   });
-  maskLayer.addFilter(maskFilter);
+  osm.addFilter(maskFilter);
 };
 //反转遮罩：全图半透明遮罩，指定区域擦干净
 // 准备反转遮罩层
@@ -157,7 +190,7 @@ const addReverseLayer = () => {
   console.log(map, reverseLayer);
   reverseLayer.setZIndex(99);
   map.addLayer(reverseLayer);
-  draw()
+  draw();
 };
 /**
  * 开始操作
@@ -165,11 +198,11 @@ const addReverseLayer = () => {
  */
 const draw = () => {
   // 将data转换为feature
-  const GuangZhouFeature = GuangZhouBoundaryJSON.features[0].geometry.coordinates;
-  const f = new Feature(new geom.MultiPolygon(GuangZhouFeature))
+  const GuangZhouFeature =
+    GuangZhouBoundaryJSON.features[0].geometry.coordinates;
+  const f = new Feature(new geom.MultiPolygon(GuangZhouFeature));
   const dataForMart = new GeoJSON().readFeatures(GuangZhouBoundaryJSON);
-  dataForMart.
-  console.log(dataForMart, "data");
+  dataForMart.console.log(dataForMart, "data");
   // 得到反转擦除后遮盖层数据
   const convertGeom = erase(dataForMart);
   const convertFt = new Feature({ geometry: convertGeom });
@@ -225,7 +258,8 @@ const createClip = (coords, canvas, type) => {
 };
 
 onMounted(() => {
-  initMap();
+  createMapMask();
+  // initMap();
   // addReverseLayer();
   // draw();
 });

@@ -9,8 +9,8 @@
         用地总览
       </div>
       <div
-        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
-        @click="switchComponent('regionalPopulation')"
+        :class="activeCompName == 'topographicOverview' ? 'use active' : 'use'"
+        @click="switchComponent('topographicOverview')"
       >
         地形概况
       </div>
@@ -36,12 +36,13 @@
 <script setup>
 import container from "@/components/container.vue";
 import landUse from "./components/landUse.vue";
+import topographicOverview from "./components/topographicOverview.vue";
 
 const activeCompName = ref("landUse");
-const activeComponent = {landUse};
+const activeComponent = {landUse,topographicOverview};
 
 const switchComponent = (componentName) => {
-  
+    activeCompName.value = componentName
 };
 </script>
 <style scoped lang="less"></style>
