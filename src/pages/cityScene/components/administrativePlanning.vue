@@ -390,8 +390,20 @@ const districts = [
   "增城区",
   "从化区",
 ];
-
-
+const areas = {
+  越秀区: 33.8,
+  海珠区: 31.8,
+  荔湾区: 16.23,
+  天河区: 96.3,
+  白云区: 795.8,
+  黄埔区: 201.5,
+  番禺区: 877.6,
+  花都区: 697.2,
+  罗湖区: 78.9,
+  南沙区: 783.5,
+  增城区: 1884.6,
+  从化区: 1871.4,
+};
 // 添加鼠标移入时间
 const addMouseMoveEvent = () => {
   tooltipDiv.initTool(viewer.cesiumWidget.container);
@@ -407,9 +419,9 @@ const addMouseMoveEvent = () => {
       tooltipDiv.showAt(
         movement.endPosition,
         `<div class="tooltip-element">
-      <div class="name">${pickedObject.id.name}</div>
-      <div class="container">
-        内容  
+      <div class="tooltip-name">${pickedObject.id.name}</div>
+      <div class="tooltip-container">
+          ${areas[pickedObject.id.name]}平方千米
       </div>
     </div>`
       );
@@ -576,16 +588,16 @@ onMounted(() => {
   -khtml-opacity: 0.8;
   -moz-opacity: 0.8;
   filter: alpha(opacity=80);
-}
-.tooltipdiv-inner {
-  padding: 3px8px;
-  background-color: #000000;
-  color: white;
-  text-align: center;
-  max-width: 200px;
-  text-decoration: none;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
+  .tooltipdiv-inner {
+    padding: 3px8px;
+    background-color: #000000;
+    color: white;
+    text-align: center;
+    max-width: 200px;
+    text-decoration: none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+  }
 }
 </style>

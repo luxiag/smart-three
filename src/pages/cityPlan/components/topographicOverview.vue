@@ -16,6 +16,7 @@ import * as proj from "ol/proj";
 import GuangZhouBoundaryJSON from "@/assets/json/GuangZhouBoundary.json";
 import MultiPolygon from "ol/geom/MultiPolygon.js";
 import { Fill, Stroke, Style, RegularShape } from "ol/style";
+import {defaults as defaultControls} from 'ol/control/defaults';
 
 import { onMounted } from "vue";
 
@@ -42,6 +43,11 @@ const initMap = () => {
       center: proj.fromLonLat([113.264434, 23.129162], "EPSG:4326"),
       zoom: 10,
     }),
+    controls:defaultControls({
+      rotate:false,
+      zoom:false,
+      attribution:false
+    })
   });
 };
 

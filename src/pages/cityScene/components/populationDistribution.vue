@@ -193,8 +193,7 @@ const createPeopleTotalLabel = () => {
     const div = document.createElement("div");
     div.innerHTML = `
      <div class="label-container">
-        <h3>${ite.name}</h3>
-        <p>人口：${(guangzhouPopulation[ite.name] / 1000).toFixed(2)} 万人</p>
+        <h3>${ite.name}${(guangzhouPopulation[ite.name] / 1000).toFixed(2)} 万人</h3>
       </div>
     `;
     div.className = "label-population";
@@ -224,18 +223,20 @@ const createLine = () => {
 
 const createPlayGround = () => {
 
+
   const groundMaterial = new THREE.MeshStandardMaterial({
     color: 0x031837,
     // specular: 0x111111,
     metalness: 0,
     roughness: 1,
     // opacity: 0.2,
-    opacity: 0.5,
+    opacity: 1,
     map:teLoader.load('/src/assets/img/background.png'),
     transparent: true,
   });
+  console.log(groundMaterial,'aaa')
   const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(2000, 2000, 1, 1),
+    new THREE.PlaneGeometry(500, 500, 1, 1),
     groundMaterial
   );
   // ground.rotation.x = - Math.PI / 2;
