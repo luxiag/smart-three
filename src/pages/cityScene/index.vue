@@ -1,29 +1,22 @@
 <template>
   <container>
-    <template v-slot:left>
-
-      
-    </template>
+    <template v-slot:left> </template>
     <template v-slot:left-use>
       <div
-        :class="
-          activeCompName == 'administrativePlanning' ? 'use active' : 'use'
-        "
-        @click="switchComponent('administrativePlanning')"
+        :class="activeCompName == 'administrative' ? 'use active' : 'use'"
+        @click="switchComponent('administrative')"
       >
         行政规划
       </div>
       <div
-        :class="
-          activeCompName == 'populationDistribution' ? 'use active' : 'use'
-        "
-        @click="switchComponent('populationDistribution')"
+        :class="activeCompName == 'population' ? 'use active' : 'use'"
+        @click="switchComponent('population')"
       >
         人口分布
       </div>
       <div
-        :class="activeCompName == 'terrain' ? 'use active' : 'use'"
-        @click="switchComponent('terrain')"
+        :class="activeCompName == 'ecology' ? 'use active' : 'use'"
+        @click="switchComponent('ecology')"
       >
         生态环境
       </div>
@@ -33,26 +26,23 @@
       <component :is="activeComponent[activeCompName]"></component>
     </template>
   </container>
-  <!-- <div class="left">
-    <div class="left-container"></div>
-    <div class="use-list">
-
-    </div>
-  </div>
-  <div class="right"></div>
-  <div class="center"></div> -->
 </template>
 <script setup>
-import environment from "./components/environment.vue";
-import administrativePlanning from "./components/administrativePlanning.vue";
-import populationDistribution from "./components/populationDistribution.vue";
+import administrative from "./components/administrative.vue";
+import ecology from "./components/ecology.vue";
+import economics from "./components/economics.vue";
+import population from "./component/population.vue";
+import technological from "./component/technological.vue";
+
 import container from "@/components/container.vue";
 
-const activeCompName = ref("populationDistribution");
+const activeCompName = ref("administrative");
 const activeComponent = {
-  environment,
-  administrativePlanning,
-  populationDistribution,
+  administrative,
+  ecology,
+  economics,
+  population,
+  technological,
 };
 
 const switchComponent = (componentName) => {

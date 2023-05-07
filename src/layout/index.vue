@@ -11,7 +11,7 @@
           @click="goPage('cityScene')"
           :class="route.path == '/cityScene' ? 'class-btn active' : 'class-btn'"
         >
-          城市全景
+          城市概况
         </button>
       </div>
       <div class="btn">

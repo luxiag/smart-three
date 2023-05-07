@@ -11,11 +11,13 @@ import * as Cesium from "cesium";
 import { onMounted } from "vue";
 
 let viewer;
+const regionalPopulationContainer = ref();
 const initMap = () => {
-  viewer = new Cesium.Viewer("cesiumContainer", {
+  viewer = new Cesium.Viewer(regionalPopulationContainer.value, {
     // 是否显示信息窗口
     // infoBox: false,
     // 是否显示查询按钮
+    animation:true,
     geocoder: false,
     // 不显示home按钮
     homeButton: false,
@@ -71,11 +73,10 @@ const initMap = () => {
     },
     duration: 2,
   });
-
 };
 
 onMounted(() => {
-  // console.log('aaa')
+  console.log("aaa");
   initMap();
 });
 </script>
