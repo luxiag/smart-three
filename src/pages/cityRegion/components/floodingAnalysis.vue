@@ -1,6 +1,9 @@
 <template>
   <div class="floodingAnalysis-page">
     <div ref="floodingAnalysisRef" class="container"></div>
+    <div class="flooding-slider">
+      <input type="range" class="range-style" />
+    </div>
   </div>
 </template>
 
@@ -51,10 +54,10 @@ const initScene = () => {
   floodingAnalysisRef.value.appendChild(renderer.domElement);
 
   window.addEventListener("resize", onWindowResize);
-  window.onclick = function () {
-    console.log("a", camera.position, controls);
-    controlWaterPlane();
-  };
+  // window.onclick = function () {
+  //   console.log("a", camera.position, controls);
+  //   controlWaterPlane();
+  // };
 };
 
 const createSky = () => {
@@ -156,11 +159,34 @@ onMounted(() => {
 </script>
 <style scoped lang="less">
 .floodingAnalysis-page {
+  @primary: #e0e0e0;
+
   width: 100%;
   height: 100;
   .container {
     width: 100%;
-    height: 100;
+    height: 100%;
   }
+
+  .flooding-slider {
+    position: relative;
+    z-index: 2;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    &:focus {
+      outline: none;
+    }
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+    }
+    &::-moz-range-thumb {
+      border: none;
+    }
+  }
+
+
 }
 </style>

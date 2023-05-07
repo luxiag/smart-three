@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@amap/amap-jsapi-loader': ^1.0.1
   '@photo-sphere-viewer/autorotate-plugin': ^5.1.5
   '@photo-sphere-viewer/core': ^5.1.5
   '@vitejs/plugin-vue': ^4.0.0
@@ -10,6 +11,8 @@ specifiers:
   echarts-gl: ^2.0.9
   less: ^4.1.3
   normalize.css: ^8.0.1
+  ol: ^7.3.0
+  ol-ext: ^4.0.7
   pinia: ^2.0.34
   pinia-plugin-persistedstate: ^3.1.0
   three: ^0.151.3
@@ -20,6 +23,7 @@ specifiers:
   vue-router: ^4.1.6
 
 dependencies:
+  '@amap/amap-jsapi-loader': 1.0.1
   '@photo-sphere-viewer/autorotate-plugin': 5.1.5
   '@photo-sphere-viewer/core': 5.1.5
   cesium: 1.104.0
@@ -28,6 +32,8 @@ dependencies:
   echarts-gl: 2.0.9_echarts@5.4.2
   less: 4.1.3
   normalize.css: 8.0.1
+  ol: 7.3.0
+  ol-ext: 4.0.7_ol@7.3.0
   pinia: 2.0.34_vue@3.2.47
   pinia-plugin-persistedstate: 3.1.0_pinia@2.0.34
   three: 0.151.3
@@ -41,6 +47,10 @@ devDependencies:
   vite: 4.2.1_less@4.1.3
 
 packages:
+
+  /@amap/amap-jsapi-loader/1.0.1:
+    resolution: {integrity: sha512-nPyLKt7Ow/ThHLkSvn2etQlUzqxmTVgK7bIgwdBRTg2HK5668oN7xVxkaiRe3YZEzGzfV2XgH5Jmu2T73ljejw==}
+    dev: false
 
   /@antfu/utils/0.7.2:
     resolution: {integrity: sha512-vy9fM3pIxZmX07dL+VX1aZe7ynZ+YyB0jY+jE6r3hOK6GNY2t6W8rzpFC4tgpbXUYABkFQwgJq2XYXlxbXAI0g==}
@@ -281,6 +291,33 @@ packages:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
     dev: false
 
+  /@mapbox/jsonlint-lines-primitives/2.0.2:
+    resolution: {integrity: sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
+  /@mapbox/mapbox-gl-style-spec/13.28.0:
+    resolution: {integrity: sha512-B8xM7Fp1nh5kejfIl4SWeY0gtIeewbuRencqO3cJDrCHZpaPg7uY+V8abuR+esMeuOjRl5cLhVTP40v+1ywxbg==}
+    hasBin: true
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.2
+      '@mapbox/point-geometry': 0.1.0
+      '@mapbox/unitbezier': 0.0.0
+      csscolorparser: 1.0.3
+      json-stringify-pretty-compact: 2.0.0
+      minimist: 1.2.8
+      rw: 1.3.3
+      sort-object: 0.3.2
+    dev: false
+
+  /@mapbox/point-geometry/0.1.0:
+    resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
+    dev: false
+
+  /@mapbox/unitbezier/0.0.0:
+    resolution: {integrity: sha512-HPnRdYO0WjFjRTSwO3frz1wKaU649OBFPX3Zo/2WZvuRi6zMiRGui8SnPQiQABgqCf8YikDe5t3HViTVw1WUzA==}
+    dev: false
+
   /@nodelib/fs.scandir/2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -300,6 +337,10 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+    dev: false
+
+  /@petamoriken/float16/3.8.0:
+    resolution: {integrity: sha512-AhVAm6SQ+zgxIiOzwVdUcDmKlu/qU39FiYD2UD6kQQaVenrn0dGZewIghWAENGQsvC+1avLCuT+T2/3Gsp/W3w==}
     dev: false
 
   /@photo-sphere-viewer/autorotate-plugin/5.1.5:
@@ -561,6 +602,10 @@ packages:
     resolution: {integrity: sha512-1j20GZTsvKNkc4BY3NpMOM8tt///wY3FpIzozTOFO2ffuZcV61nojHXVKIy3WM+7ADCy5FVhdZYHYDdgTU0yJw==}
     dependencies:
       is-what: 3.14.1
+
+  /csscolorparser/1.0.3:
+    resolution: {integrity: sha512-umPSgYwZkdFoUrH5hIq5kf0wPSXiro51nPw0j2K/c83KflkPSTBGMz6NJvMB+07VlL0y7VPo6QJcDjcgKTTm3w==}
+    dev: false
 
   /csstype/2.6.21:
     resolution: {integrity: sha512-Z1PhmomIfypOpoMjRQB70jfvy/wxT50qW08YXO5lMIJkrdq4yOTR+AW7FqutScmB9NkLwxo+jU+kZLbofZZq/w==}
@@ -934,6 +979,19 @@ packages:
   /function-bind/1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
 
+  /geotiff/2.0.7:
+    resolution: {integrity: sha512-FKvFTNowMU5K6lHYY2f83d4lS2rsCNdpUC28AX61x9ZzzqPNaWFElWv93xj0eJFaNyOYA63ic5OzJ88dHpoA5Q==}
+    engines: {node: '>=10.19'}
+    dependencies:
+      '@petamoriken/float16': 3.8.0
+      lerc: 3.0.0
+      pako: 2.1.0
+      parse-headers: 2.0.5
+      quick-lru: 6.1.1
+      web-worker: 1.2.0
+      xml-utils: 1.7.0
+    dev: false
+
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -961,6 +1019,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       safer-buffer: 2.1.2
+
+  /ieee754/1.2.1:
+    resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: false
 
   /image-size/0.5.5:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
@@ -1011,6 +1073,10 @@ packages:
     engines: {node: '>= 10.16.0'}
     dev: false
 
+  /json-stringify-pretty-compact/2.0.0:
+    resolution: {integrity: sha512-WRitRfs6BGq4q8gTgOy4ek7iPFXjbra0H3PmDLKm2xnZ+Gh1HUhiKGgCZkSPNULlP7mvfu6FV/mOLhCarspADQ==}
+    dev: false
+
   /jsonc-parser/3.2.0:
     resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
     dev: false
@@ -1025,6 +1091,10 @@ packages:
 
   /lerc/2.0.0:
     resolution: {integrity: sha512-7qo1Mq8ZNmaR4USHHm615nEW2lPeeWJ3bTyoqFbd35DLx0LUH7C6ptt5FDCTAlbIzs3+WKrk5SkJvw8AFDE2hg==}
+    dev: false
+
+  /lerc/3.0.0:
+    resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
     dev: false
 
   /less/4.1.3:
@@ -1076,6 +1146,10 @@ packages:
       semver: 5.7.1
     optional: true
 
+  /mapbox-to-css-font/2.4.2:
+    resolution: {integrity: sha512-f+NBjJJY4T3dHtlEz1wCG7YFlkODEjFIYlxDdLIDMNpkSksqTt+l/d4rjuwItxuzkuMFvPyrjzV2lxRM4ePcIA==}
+    dev: false
+
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -1109,6 +1183,10 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
+    dev: false
+
+  /minimist/1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
     dev: false
 
   /mlly/1.2.0:
@@ -1155,8 +1233,37 @@ packages:
     resolution: {integrity: sha512-9d1HbpKLh3sdWlhXMhU6MMH+wQzKkrgfRkYV0EBdvt99YJfj0ilCJrWRDYG2130Tm4GXbEoTCx5b34JSaP+HhA==}
     dev: false
 
+  /ol-ext/4.0.7_ol@7.3.0:
+    resolution: {integrity: sha512-7ctK7nxR/F27bh11Y+WEVuq8xdkLRTutVxQTov/jg89s9yyXgNFtswaJsREtckhYhbMFP5aXyVNvLkAcPOzguA==}
+    peerDependencies:
+      ol: '>= 5.3.0'
+    dependencies:
+      ol: 7.3.0
+    dev: false
+
+  /ol-mapbox-style/9.7.0:
+    resolution: {integrity: sha512-YX3u8FBJHsRHaoGxmd724Mp5WPTuV7wLQW6zZhcihMuInsSdCX1EiZfU+8IAL7jG0pbgl5YgC0aWE/MXJcUXxg==}
+    dependencies:
+      '@mapbox/mapbox-gl-style-spec': 13.28.0
+      mapbox-to-css-font: 2.4.2
+    dev: false
+
+  /ol/7.3.0:
+    resolution: {integrity: sha512-08vJE4xITKPazQ9qJjeqYjRngnM9s+1eSv219Pdlrjj3LpLqjEH386ncq+76Dw1oGPGR8eLVEePk7FEd9XqqMw==}
+    dependencies:
+      earcut: 2.2.4
+      geotiff: 2.0.7
+      ol-mapbox-style: 9.7.0
+      pbf: 3.2.1
+      rbush: 3.0.1
+    dev: false
+
   /pako/2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+    dev: false
+
+  /parse-headers/2.0.5:
+    resolution: {integrity: sha512-ft3iAoLOB/MlwbNXgzy43SWGP6sQki2jQvAyBg/zDFAgr9bfNWZIUj42Kw2eJIl8kEi4PbgE6U1Zau/HwI75HA==}
     dev: false
 
   /parse-node-version/1.0.1:
@@ -1168,6 +1275,14 @@ packages:
 
   /pathe/1.1.0:
     resolution: {integrity: sha512-ODbEPR0KKHqECXW1GoxdDb+AZvULmXjVPy4rt+pGo2+TnjJTIPJQSVS6N63n8T2Ip+syHhbn52OewKicV0373w==}
+    dev: false
+
+  /pbf/3.2.1:
+    resolution: {integrity: sha512-ClrV7pNOn7rtmoQVF4TS1vyU0WhYRnP92fzbfF75jAIwpnzdJXf8iTd4CMEqO4yUenH6NDqLiwjqlh6QgZzgLQ==}
+    hasBin: true
+    dependencies:
+      ieee754: 1.2.1
+      resolve-protobuf-schema: 2.1.0
     dev: false
 
   /picocolors/1.0.0:
@@ -1243,12 +1358,21 @@ packages:
       long: 5.2.3
     dev: false
 
+  /protocol-buffers-schema/3.6.0:
+    resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
+    dev: false
+
   /prr/1.0.1:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==}
     optional: true
 
   /queue-microtask/1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+    dev: false
+
+  /quick-lru/6.1.1:
+    resolution: {integrity: sha512-S27GBT+F0NTRiehtbrgaSE1idUAJ5bX8dPAQTdylEyNlrdcH5X4Lz7Edz3DYzecbsCluD5zO8ZNEe04z3D3u6Q==}
+    engines: {node: '>=12'}
     dev: false
 
   /quickselect/2.0.0:
@@ -1266,6 +1390,12 @@ packages:
     engines: {node: '>=8.10.0'}
     dependencies:
       picomatch: 2.3.1
+    dev: false
+
+  /resolve-protobuf-schema/2.1.0:
+    resolution: {integrity: sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==}
+    dependencies:
+      protocol-buffers-schema: 3.6.0
     dev: false
 
   /resolve/1.22.2:
@@ -1317,6 +1447,24 @@ packages:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
     hasBin: true
     optional: true
+
+  /sort-asc/0.1.0:
+    resolution: {integrity: sha512-jBgdDd+rQ+HkZF2/OHCmace5dvpos/aWQpcxuyRs9QUbPRnkEJmYVo81PIGpjIdpOcsnJ4rGjStfDHsbn+UVyw==}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
+  /sort-desc/0.1.1:
+    resolution: {integrity: sha512-jfZacW5SKOP97BF5rX5kQfJmRVZP5/adDUTY8fCSPvNcXDVpUEe2pr/iKGlcyZzchRJZrswnp68fgk3qBXgkJw==}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
+  /sort-object/0.3.2:
+    resolution: {integrity: sha512-aAQiEdqFTTdsvUFxXm3umdo04J7MRljoVGbBlkH7BgNsMvVNAJyGj7C/wV1A8wHWAJj/YikeZbfuCKqhggNWGA==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      sort-asc: 0.1.0
+      sort-desc: 0.1.1
+    dev: false
 
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
@@ -1505,6 +1653,10 @@ packages:
       '@vue/server-renderer': 3.2.47_vue@3.2.47
       '@vue/shared': 3.2.47
 
+  /web-worker/1.2.0:
+    resolution: {integrity: sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==}
+    dev: false
+
   /webpack-sources/3.2.3:
     resolution: {integrity: sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==}
     engines: {node: '>=10.13.0'}
@@ -1512,6 +1664,10 @@ packages:
 
   /webpack-virtual-modules/0.5.0:
     resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
+    dev: false
+
+  /xml-utils/1.7.0:
+    resolution: {integrity: sha512-bWB489+RQQclC7A9OW8e5BzbT8Tu//jtAOvkYwewFr+Q9T9KDGvfzC1lp0pYPEQPEoPQLDkmxkepSC/2gIAZGw==}
     dev: false
 
   /zrender/5.4.3:

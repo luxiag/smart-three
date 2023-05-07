@@ -7,7 +7,7 @@ import { AutorotatePlugin } from "@photo-sphere-viewer/autorotate-plugin";
 import { onMounted } from "vue";
 import "@photo-sphere-viewer/core/index.css";
 let viewer, autorotate;
-const baseUrl = "https://photo-sphere-viewer-data.netlify.app/assets/";
+const baseUrl = "public/imgs/";
 const animatedValues = {
   pitch: { start: -Math.PI / 2, end: 0.2 },
   yaw: { start: Math.PI, end: 0 },
