@@ -1,8 +1,8 @@
 <template>
-  <div class="regionalPopulation-page page">
+  <div class="administrative-page page">
     <div
-      id="regionalPopulationContainer"
-      ref="regionalPopulationContainer"
+      id="administrativeContainer"
+      ref="administrativeContainer"
     ></div>
   </div>
 </template>
@@ -13,10 +13,10 @@ import { onMounted } from "vue";
 // import "http://api.tianditu.gov.cn/cdn/plugins/cesium/cesiumTdt.js"
 
 const dataSource = new Cesium.GeoJsonDataSource();
-const regionalPopulationContainer = ref();
+const administrativeContainer = ref();
 let viewer;
 const initMap = () => {
-  viewer = new Cesium.Viewer("regionalPopulationContainer", {
+  viewer = new Cesium.Viewer("administrativeContainer", {
     // 是否显示信息窗口
     infoBox: false,
     // 是否显示查询按钮
@@ -554,7 +554,7 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
-#regionalPopulationContainer {
+#administrativeContainer {
   width: 100%;
   height: 100%;
   :deep(canvas) {

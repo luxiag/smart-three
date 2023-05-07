@@ -3,15 +3,17 @@
     <template v-slot:left></template>
     <template v-slot:left-use>
       <div
-        :class="activeCompName == 'environment' ? 'use active' : 'use'"
-        @click="switchComponent('environment')"
+        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
+        @click="switchComponent('regionalPopulation')"
       >
-      <!-- cesium 项目那个实现 -->
+        <!-- cesium 项目那个实现 -->
         区域人口管理
       </div>
       <div
-        :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
-        @click="switchComponent('regionalPopulation')"
+        :class="
+          activeCompName == 'industrialDistribution' ? 'use active' : 'use'
+        "
+        @click="switchComponent('industrialDistribution')"
       >
         产业分布
       </div>
@@ -30,10 +32,14 @@
 </template>
 <script setup>
 import container from "@/components/container.vue";
+import industrialDistribution from "./components/industrialDistribution.vue";
+import regionalPopulation from "./components/regionalPopulation.vue";
 
-const activeCompName = ref("");
-const activeComponent = {};
+const activeCompName = ref("regionalPopulation");
+const activeComponent = { regionalPopulation, industrialDistribution };
 
-const switchComponent = (componentName) => {};
+const switchComponent = (componentName) => {
+  activeCompName.value = componentName;
+};
 </script>
 <style scoped lang="less"></style>
