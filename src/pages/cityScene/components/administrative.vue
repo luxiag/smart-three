@@ -14,8 +14,12 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 
 let map, scene, camera, renderer, labelRenderer, controls;
+const regions = [];
 const labelGroup = new THREE.Group();
 
 const administrativeRef = ref();
@@ -174,7 +178,7 @@ const drawRegionGraph = (geoJson) => {
       });
     }
   });
-  guangZhouMap.position.z = 0.2;
+  //   guangZhouMap.position.z = 0.2;
   scene.add(guangZhouMap);
 };
 const initCSS2DRender = () => {
@@ -186,11 +190,15 @@ const initCSS2DRender = () => {
 };
 
 const createCityNameLabel = (position, cityName) => {
+  const city = {
+    cityName,
+  };
   const cityDiv = document.createElement("div");
   cityDiv.className = "city-label";
   cityDiv.textContent = cityName;
   const cityLabel = new CSS2DObject(cityDiv);
   const [x, y] = projection(position);
+  city.position = [x, y];
   if (cityName == "白云区") {
     cityLabel.position.set(x, -y + 0.3, 0);
   } else if (cityName == "海珠区") {
@@ -203,7 +211,82 @@ const createCityNameLabel = (position, cityName) => {
     cityLabel.position.set(x, -y, 0);
   }
   labelGroup.add(cityLabel);
+  regions.push(city);
   return cityLabel;
+};
+
+const createCityCurve = () => {
+  const startCityPosition = regions[0].position;
+  const endCityPosition = regions[1].position;
+
+  const pointArrays = [
+    new THREE.Vector3(startCityPosition[0], startCityPosition[1], 0),
+    new THREE.Vector3(
+      (startCityPosition[0] + endCityPosition[0]) / 2,
+      (startCityPosition[1] + endCityPosition[1]) / 2,
+      0.2
+    ),
+    new THREE.Vector3(endCityPosition[0], endCityPosition[1], 0),
+  ];
+  const curve = new THREE.CatmullRomCurve3(pointArrays);
+
+  console.log(curve, "aa");
+  const points = curve.getPoints(100);
+
+  const geometry = new LineGeometry();
+
+  geometry.setPositions(points.map((p) => p.toArray()).flat());
+  const material = new LineMaterial({
+    color: 0x304ffe,
+    linewidth: 3,
+  });
+  material.resolution.set(window.innerWidth, window.innerHeight);
+  const curveObject = new THREE.Line(geometry, material);
+  curveObject.computeLineDistances();
+
+  const outLinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  outLinePass.selectedObjects = [curveObject];
+  outLinePass.edgeStrength = 1;
+
+  //   curveObject.scale.set(2, 2, 2);
+  scene.add(curveObject);
+};
+
+const createRegion3DBoundary = (cityJSON) => {
+  const features = cityJSON.features;
+  features.forEach((feature, index) => {
+    const properties = feature.properties;
+    const cityLabel = createCityNameLabel(properties.center, properties.name);
+    const coordinates = feature.geometry.coordinates;
+    if (feature.geometry.type === "MultiPolygon") {
+      coordinates.forEach((coordinate) => {
+        coordinate.forEach((rows) => {
+          const shape = new THREE.Shape();
+
+          rows.forEach((row, i) => {
+            const [x, y] = projection(row);
+            if (i == 0) {
+              shape.moveTo(x, -y);
+            }
+            shape.lineTo(x, -y);
+          });
+          const geometry = new THREE.ShapeGeometry(shape);
+          const material = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            color: bgColor,
+            // color:color[bgColorIdx]
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.add(cityLabel);
+          guangZhouMap.add(mesh);
+        });
+      });
+    }
+  });
 };
 
 const animate = () => {
@@ -222,10 +305,11 @@ onMounted(async () => {
   initCSS2DRender();
   initControls();
   animate();
-  drawCityBoundary(GuangZhouBoundary);
+  //   drawCityBoundary(GuangZhouBoundary);
   drawRegionGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
+  //   createCityCurve();
 });
 </script>
 <style lang="less" scoped>
