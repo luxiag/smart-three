@@ -74,6 +74,7 @@ const onWindowResize = () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
 };
 
 const initControls = () => {
@@ -137,7 +138,7 @@ const drawCityBoundary = (geoJson) => {
 };
 
 const createCityPlane = () => {
-  const planGeometry = new THREE.PlaneGeometry(10, 10);
+  const planGeometry = new THREE.PlaneGeometry(4.5, 4.5);
   const gzMap = loader.load("/imgs/guangzhouMap.png");
   const gzAlphaMap = loader.load("/imgs/guangzhouAlphaMap.png");
   // gzTexture.minFilter = THREE.LinearFilter;
@@ -145,9 +146,12 @@ const createCityPlane = () => {
     map: gzMap,
     // alphaMap: gzAlphaMap,
     side: THREE.DoubleSide,
-    transparent: true
+    transparent: true,
   });
   const gzPlane = new THREE.Mesh(planGeometry, material);
+  gzPlane.position.z = -0.1;
+  gzPlane.position.y = 0.28;
+  gzPlane.position.x = 0.66;
   scene.add(gzPlane);
 };
 
@@ -187,9 +191,13 @@ const drawRegionGraph = (geoJson) => {
           );
           const bgColorIdx =
             index > color.length ? index % color.length : index;
+
+          const meshTexture = loader.load("/imgs/mesh.jpg");
           const material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
             color: bgColor,
+            // map: meshTexture,
+
             // color:color[bgColorIdx]
           });
           const mesh = new THREE.Mesh(geometry, material);
@@ -199,6 +207,13 @@ const drawRegionGraph = (geoJson) => {
       });
     }
   });
+  console.log(guangZhouMap);
+  // 获取物体边界框
+  var bbox = new THREE.Box3().setFromObject(guangZhouMap);
+  var size = new THREE.Vector3();
+  bbox.getSize(size);
+
+  console.log(size.x, size.y, size.z);
   //   guangZhouMap.position.z = 0.2;
   scene.add(guangZhouMap);
 };
@@ -328,7 +343,7 @@ onMounted(async () => {
   animate();
   // drawCityBoundary(GuangZhouBoundary);
   createCityPlane();
-  // drawRegionGraph(GuangZhou);
+  drawRegionGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
   //   createCityCurve();
