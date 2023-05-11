@@ -77,7 +77,7 @@ const createMapMask = () => {
     feature: f,
     wrapX: true,
     inner: false,
-    fill: new Fill({ color: [255, 255, 255, 0.8] }),
+    fill: new Fill({ color: [0, 0, 0, 1] }),
   });
   osm.addFilter(maskFilter);
   map.addLayer(osm);

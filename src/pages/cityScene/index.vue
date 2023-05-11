@@ -31,8 +31,8 @@
 import administrative from "./components/administrative.vue";
 import ecology from "./components/ecology.vue";
 import economics from "./components/economics.vue";
-import population from "./component/population.vue";
-import technological from "./component/technological.vue";
+import population from "./components/population.vue";
+import technological from "./components/technological.vue";
 
 import container from "@/components/container.vue";
 

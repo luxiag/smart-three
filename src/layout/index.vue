@@ -2,7 +2,7 @@
   <div class="app">
     <div class="header">
       <div class="header-bg">
-        <div class="title">数字孪生智慧广州管理平台</div>
+        <!-- <div class="title">数字孪生智慧广州管理平台</div> -->
       </div>
     </div>
     <div class="btn-func">
