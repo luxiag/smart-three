@@ -117,17 +117,38 @@ const drawCityBoundary = (geoJson) => {
         });
         const geometry = new THREE.ShapeGeometry(shape);
 
-        const gzTexture = loader.load("/imgs/guangzhoubg.png");
-        gzTexture.minFilter = THREE.LinearFilter;
+        const gzMap = loader.load("/imgs/guangzhouMap.png");
+        const gzAlphaMap = loader.load("/imgs/guangzhouAlphaMap.png");
+        // gzTexture.minFilter = THREE.LinearFilter;
         const material = new THREE.MeshBasicMaterial({
-          map: gzTexture,
+          map: gzMap,
+          alphaMap: gzAlphaMap,
           side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(geometry, material);
+        geometry.setAttribute(
+          "uv2",
+          new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
+        );
         scene.add(mesh);
       });
     }
   });
+};
+
+const createCityPlane = () => {
+  const planGeometry = new THREE.PlaneGeometry(10, 10);
+  const gzMap = loader.load("/imgs/guangzhouMap.png");
+  const gzAlphaMap = loader.load("/imgs/guangzhouAlphaMap.png");
+  // gzTexture.minFilter = THREE.LinearFilter;
+  const material = new THREE.MeshBasicMaterial({
+    map: gzMap,
+    // alphaMap: gzAlphaMap,
+    side: THREE.DoubleSide,
+    transparent: true
+  });
+  const gzPlane = new THREE.Mesh(planGeometry, material);
+  scene.add(gzPlane);
 };
 
 const drawRegionGraph = (geoJson) => {
@@ -305,8 +326,9 @@ onMounted(async () => {
   initCSS2DRender();
   initControls();
   animate();
-  //   drawCityBoundary(GuangZhouBoundary);
-  drawRegionGraph(GuangZhou);
+  // drawCityBoundary(GuangZhouBoundary);
+  createCityPlane();
+  // drawRegionGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
   //   createCityCurve();
