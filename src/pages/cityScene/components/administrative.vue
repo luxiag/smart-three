@@ -25,6 +25,10 @@ const labelGroup = new THREE.Group();
 const administrativeRef = ref();
 const loader = new THREE.TextureLoader();
 
+const setting = {
+  geoMapHeight: -0.1,
+};
+
 const initMap = () => {
   return new Promise((resolve) => {
     scene = new THREE.Scene();
@@ -97,6 +101,34 @@ const projection = d3
   .center([113.280637, 23.125178])
   .translate([0, 0, 0]);
 
+const getRegionCenterData = (geoJson) => {
+  return new Promise((resolve) => {
+    const features = geoJson.features;
+    features.forEach(async (feature) => {
+      const region = {};
+      const cityName = feature.properties.name;
+      region.regionName = feature.properties.name;
+      region.adcode = feature.properties.adcode;
+      const [x, y] = projection(feature.properties.center);
+      region.position = new THREE.Vector3();
+      if (cityName == "白云区") {
+        region.position.set(x, -y + 0.3, 0);
+      } else if (cityName == "海珠区") {
+        region.position.set(x + 0.2, -y - 0.1, 0);
+      } else if (cityName == "荔湾区") {
+        region.position.set(x - 0.1, -y - 0.1, 0);
+      } else if (cityName == "天河区") {
+        region.position.set(x + 0.1, -y + 0.1, 0);
+      } else {
+        region.position.set(x, -y, 0);
+      }
+      // region.position =
+      regions.push(region);
+    });
+    resolve(regions);
+  });
+};
+
 const drawCityBoundary = (geoJson) => {
   const features = geoJson.features;
 
@@ -121,37 +153,48 @@ const drawCityBoundary = (geoJson) => {
         const gzMap = loader.load("/imgs/guangzhouMap.png");
         const gzAlphaMap = loader.load("/imgs/guangzhouAlphaMap.png");
         // gzTexture.minFilter = THREE.LinearFilter;
-        const material = new THREE.MeshBasicMaterial({
+        const material = new THREE.MeshStandardMaterial({
           map: gzMap,
           alphaMap: gzAlphaMap,
           side: THREE.DoubleSide,
+          // 设置为 RepeatWrapping
+          wrapS: THREE.RepeatWrapping,
+          wrapT: THREE.RepeatWrapping,
+          opacity: 1,
+          // 设置重复次数
+          repeat: new THREE.Vector2(0.5, 0.5),
+          // transparent:true
         });
         const mesh = new THREE.Mesh(geometry, material);
-        geometry.setAttribute(
-          "uv2",
-          new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
-        );
+
         scene.add(mesh);
       });
     }
   });
 };
 
+const createLight = () => {
+  const light = new THREE.AmbientLight(0xfff); // soft white light
+  scene.add(light);
+};
+
+const createCityPlaneLabel = () => {};
+
 const createCityPlane = () => {
-  const planGeometry = new THREE.PlaneGeometry(4.5, 4.5);
+  const planGeometry = new THREE.PlaneGeometry(4.8, 4.4);
   const gzMap = loader.load("/imgs/guangzhouMap.png");
   const gzAlphaMap = loader.load("/imgs/guangzhouAlphaMap.png");
   // gzTexture.minFilter = THREE.LinearFilter;
   const material = new THREE.MeshBasicMaterial({
     map: gzMap,
-    // alphaMap: gzAlphaMap,
+    alphaMap: gzAlphaMap,
     side: THREE.DoubleSide,
     transparent: true,
   });
   const gzPlane = new THREE.Mesh(planGeometry, material);
   gzPlane.position.z = -0.1;
   gzPlane.position.y = 0.28;
-  gzPlane.position.x = 0.66;
+  gzPlane.position.x = 0.65;
   scene.add(gzPlane);
 };
 
@@ -217,6 +260,110 @@ const drawRegionGraph = (geoJson) => {
   //   guangZhouMap.position.z = 0.2;
   scene.add(guangZhouMap);
 };
+
+const drawRegionMeshLabel = () => {
+  const labelGroup = new THREE.Group();
+  regions.forEach((region) => {
+    const cityDiv = document.createElement("div");
+    let number = Math.random() * 100;
+    number = number.toFixed(1);
+    cityDiv.className = "region-mesh__label";
+    cityDiv.innerHTML = `
+    <div class="left">
+     <p class="label-title">
+      <span class="circle"></span>
+      ${region.regionName}监测点</p>
+     <p>空气指数：<span class="yellow">良</span></p>
+     <p>湿度：<span class="yellow">69%</span></p>
+      </div>
+      <div class="right">
+        <div class="circle">
+           ${number}%
+          </div>
+        </div>
+    `;
+    // cityDiv.textContent = ;
+    const cityLabel = new CSS2DObject(cityDiv);
+    cityLabel.position.copy(region.position);
+    // cityLabel.position.set(region.position);
+
+    labelGroup.add(cityLabel);
+    // regionMesh.add(cityLabel)
+  });
+  console.log(labelGroup);
+  // labelGroup.add()
+  return labelGroup;
+};
+
+const drawRegionMeshGraph = (geoJson) => {
+  const features = geoJson.features;
+  const guangZhouMap = new THREE.Object3D();
+  const color = [
+    "#f09135",
+    "#eb4629",
+    "#dee551",
+    "#ed6cdd",
+    "#7ad349",
+    "#ec6bdc",
+  ];
+  const labelGroup = drawRegionMeshLabel();
+
+  features.forEach((feature, index) => {
+    const coordinates = feature.geometry.coordinates;
+    if (feature.geometry.type === "MultiPolygon") {
+      coordinates.forEach((coordinate) => {
+        coordinate.forEach((rows) => {
+          const shape = new THREE.Shape();
+
+          rows.forEach((row, i) => {
+            const [x, y] = projection(row);
+            if (i == 0) {
+              shape.moveTo(x, -y);
+            }
+            shape.lineTo(x, -y);
+          });
+          const geometry = new THREE.ShapeGeometry(shape);
+          const bgColor = new THREE.Color(
+            Math.random() * 0.5 + 0.5,
+            Math.random() * 0.5 + 0.5,
+            Math.random() * 0.5 + 0.5
+          );
+          const bgColorIdx =
+            index > color.length ? index % color.length : index;
+
+          const gzMap = loader.load("/imgs/guangzhouMap.png");
+          const meshTexture = loader.load("/imgs/mesh.jpeg");
+          meshTexture.wrapS = THREE.RepeatWrapping;
+          meshTexture.wrapT = THREE.RepeatWrapping;
+          // meshTexture.repeat.set(1, 2);
+          const material = new THREE.MeshBasicMaterial({
+            // side: THREE.DoubleSide,
+            color: bgColor,
+            map: meshTexture,
+            opacity: 0.5,
+            transparent: true,
+            combine: THREE.MixOperation,
+
+            // color:color[bgColorIdx]
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+          // mesh.add(labelGroup.children[index])
+          // console.log(labelGroup.children[index])
+          // mesh.add(cityLabel);
+          guangZhouMap.add(mesh);
+        });
+      });
+    }
+  });
+
+  // guangZhouMap.material.map = meshTexture
+  guangZhouMap.position.z = setting.geoMapHeight + 0.01;
+  camera.rotateZ(Math.PI / 2);
+  // console.log(labelGroup.children)
+  scene.add(labelGroup);
+  scene.add(guangZhouMap);
+};
+
 const initCSS2DRender = () => {
   labelRenderer = new CSS2DRenderer();
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -226,15 +373,11 @@ const initCSS2DRender = () => {
 };
 
 const createCityNameLabel = (position, cityName) => {
-  const city = {
-    cityName,
-  };
   const cityDiv = document.createElement("div");
   cityDiv.className = "city-label";
   cityDiv.textContent = cityName;
   const cityLabel = new CSS2DObject(cityDiv);
   const [x, y] = projection(position);
-  city.position = [x, y];
   if (cityName == "白云区") {
     cityLabel.position.set(x, -y + 0.3, 0);
   } else if (cityName == "海珠区") {
@@ -247,11 +390,12 @@ const createCityNameLabel = (position, cityName) => {
     cityLabel.position.set(x, -y, 0);
   }
   labelGroup.add(cityLabel);
-  regions.push(city);
+
   return cityLabel;
 };
 
 const createCityCurve = () => {
+  console.log(regions, "regions");
   const startCityPosition = regions[0].position;
   const endCityPosition = regions[1].position;
 
@@ -338,20 +482,63 @@ const render = () => {
 
 onMounted(async () => {
   await initMap();
+  await getRegionCenterData(GuangZhou);
+  createLight();
   initCSS2DRender();
   initControls();
   animate();
   // drawCityBoundary(GuangZhouBoundary);
   createCityPlane();
-  drawRegionGraph(GuangZhou);
+  // drawRegionGraph(GuangZhou);
+  drawRegionMeshGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
-  //   createCityCurve();
+  // createCityCurve();
 });
 </script>
 <style lang="less" scoped>
 .administrative-page {
   width: 100%;
   height: 100%;
+}
+:deep(.region-mesh__label) {
+  background: rgba(80, 53, 78, 0.5);
+  padding: 4px;
+  font-size: 12px;
+  display: flex;
+  .left {
+    margin-right: 8px;
+    .label-title {
+      margin-bottom: 5px;
+      .circle {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        background: #26a69a;
+        border-radius: 50%;
+      }
+    }
+  }
+  .right {
+    .circle {
+      background-color: rgba(255, 255, 255, 0.3);
+      height: 100%;
+      width: 100%;
+      border-radius: 50%;
+      /* padding: 10px; */
+      width: 44px;
+      height: 44px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+    }
+  }
+  .yellow {
+    color: #fdd835;
+  }
+  p {
+    margin: 4px 0;
+  }
 }
 </style>
