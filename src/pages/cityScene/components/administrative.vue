@@ -42,7 +42,7 @@ const initMap = () => {
     camera.position.z = 4;
     scene.add(camera);
 
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     administrativeRef.value.appendChild(renderer.domElement);
@@ -437,6 +437,7 @@ const createCityCurve = () => {
 };
 
 const createRegion3DBoundary = (cityJSON) => {
+  const guangZhouMap = new THREE.Object3D();
   const features = cityJSON.features;
   features.forEach((feature, index) => {
     const properties = feature.properties;
@@ -446,27 +447,60 @@ const createRegion3DBoundary = (cityJSON) => {
       coordinates.forEach((coordinate) => {
         coordinate.forEach((rows) => {
           const shape = new THREE.Shape();
-
+          const pointsArray = new Array();
           rows.forEach((row, i) => {
             const [x, y] = projection(row);
+            pointsArray.push(new THREE.Vector3(x, -y, 0.1));
             if (i == 0) {
               shape.moveTo(x, -y);
             }
             shape.lineTo(x, -y);
           });
-          const geometry = new THREE.ShapeGeometry(shape);
+          // 面
+          const lineGeometry = new THREE.BufferGeometry();
+          lineGeometry.setFromPoints(pointsArray);
+          const lineColor = new THREE.Color(
+            Math.random() * 0.5 + 0.5,
+            Math.random() * 0.5 + 0.5,
+            Math.random() * 0.5 + 0.5
+          );
+          const lineMaterial = new THREE.LineBasicMaterial({
+            color: lineColor,
+          });
+          const line = new THREE.Line(lineGeometry, lineMaterial);
+          guangZhouMap.add(line);
+
+          const extrudeSettings = {
+            depth: 0.1,
+            bevelEnabled: false,
+            bevelSegments: 1,
+            bevelThickness: 0.2,
+          };
+          const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
           const material = new THREE.MeshBasicMaterial({
-            side: THREE.DoubleSide,
-            color: bgColor,
+            color: 0xff0000,
+            opacity: 0.1,
+            transparent: true,
+            // wireframe: true,
+            // side: THREE.DoubleSide,
+            // color: bgColor,
             // color:color[bgColorIdx]
           });
-          const mesh = new THREE.Mesh(geometry, material);
+          const material1 = new THREE.MeshStandardMaterial({
+            vertexColors: THREE.VertexColors,
+            opacity: 0.5,
+            transparent: true,
+
+            // color: color,
+          });
+          const mesh = new THREE.Mesh(geometry, [material, material1]);
           mesh.add(cityLabel);
           guangZhouMap.add(mesh);
         });
       });
     }
   });
+  scene.add(guangZhouMap);
 };
 
 const animate = () => {
@@ -489,11 +523,12 @@ onMounted(async () => {
   animate();
   // drawCityBoundary(GuangZhouBoundary);
   createCityPlane();
+  // createRegion3DBoundary(GuangZhou);
   // drawRegionGraph(GuangZhou);
-  drawRegionMeshGraph(GuangZhou);
+  // drawRegionMeshGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
-  // createCityCurve();
+  createCityCurve();
 });
 </script>
 <style lang="less" scoped>
