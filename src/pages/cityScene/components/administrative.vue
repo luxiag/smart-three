@@ -17,8 +17,12 @@ import {
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { cloneDeep } from "lodash";
+import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass.js";
 
-let map, scene, camera, renderer, labelRenderer, controls;
+let map, scene, camera, renderer, labelRenderer, controls, composer;
 const regions = [];
 const labelGroup = new THREE.Group();
 
@@ -32,7 +36,9 @@ const setting = {
 const initMap = () => {
   return new Promise((resolve) => {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0f12);
+    const bgTexture = loader.load("/imgs/bg.jpg");
+    // scene.background = new THREE.Color(0x0a0f12);
+    scene.background = bgTexture;
     camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -340,7 +346,7 @@ const drawRegionMeshGraph = (geoJson) => {
             // side: THREE.DoubleSide,
             color: bgColor,
             map: meshTexture,
-            opacity: 0.5,
+            opacity: 0.3,
             transparent: true,
             combine: THREE.MixOperation,
 
@@ -395,24 +401,165 @@ const createCityNameLabel = (position, cityName) => {
 };
 
 const createCityCurve = () => {
-  console.log(regions, "regions");
+  const posArray = cloneDeep(regions);
+  posArray.splice(1, 1);
+
+  const curveObjArr = new THREE.Object3D();
+  const aimPosition = regions[1];
+
+  const blueBloomArr = [];
+  const redBloomArr = [];
+  console.log(posArray, regions, "aa");
+  posArray.forEach((pos, index) => {
+    const startCityPosition = pos.position;
+
+    const endCityPosition = aimPosition.position;
+    const middleCityPosition = startCityPosition
+      .clone()
+      .lerp(endCityPosition, 0.5);
+    middleCityPosition.z = 0.3;
+    const pointArrays = [
+      startCityPosition,
+      middleCityPosition,
+      endCityPosition,
+    ];
+    const curve = new THREE.CatmullRomCurve3(pointArrays);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    const tubeGeometry = new THREE.TubeGeometry(curve, 640, 0.005, 80, false);
+    const tubeMesh = new THREE.Mesh(tubeGeometry, material);
+    // scene.add(tubeMesh);
+    curveObjArr.add(tubeMesh);
+    if (index % 2 == 0) {
+      blueBloomArr.push(tubeMesh);
+    } else {
+      redBloomArr.push(tubeMesh);
+    }
+  });
+  console.log(curveObjArr.position, "position");
+  curveObjArr.position.z = -0.1;
+
+  scene.add(curveObjArr);
+  const blueOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  blueOutlinePass.edgeStrength = 2;
+  blueOutlinePass.edgeGlow = 2;
+  // 设置轮廓边框的粗细
+  blueOutlinePass.edgeThickness = 3;
+  blueOutlinePass.pulsePeriod = 1;
+  blueOutlinePass.visibleEdgeColor.set("#304FFE");
+  blueOutlinePass.selectedObjects = blueBloomArr;
+  composer?.addPass(blueOutlinePass);
+
+  const redOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  redOutlinePass.edgeStrength = 2;
+  redOutlinePass.edgeGlow = 2;
+  redOutlinePass.edgeThickness = 3;
+
+  redOutlinePass.pulsePeriod = 1;
+  // 设置轮廓边框的粗细
+  redOutlinePass.visibleEdgeColor.set("#DD2C00");
+  redOutlinePass.selectedObjects = redBloomArr;
+  composer?.addPass(redOutlinePass);
+  //
+
+  const circleGeometry = new THREE.SphereGeometry(0.02, 32, 32);
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: "#fff" });
+  const sphere = new THREE.Mesh(circleGeometry, circleMaterial);
+  sphere.position.z = -0.06;
+  sphere.position.y = -0.02;
+  sphere.position.x = 0.01;
+  const sphereOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  sphereOutlinePass.edgeStrength = 4;
+  sphereOutlinePass.edgeGlow = 4;
+  sphereOutlinePass.edgeThickness = 3;
+
+  sphereOutlinePass.pulsePeriod = 0;
+  // 设置轮廓边框的粗细
+  sphereOutlinePass.visibleEdgeColor.set("#fff");
+  sphereOutlinePass.selectedObjects = [sphere];
+  composer?.addPass(sphereOutlinePass);
+  scene.add(sphere);
+
+  const bloomPass = new BloomPass(
+    1, // 亮度阈值
+    25, // 泛光强度
+    4, // 模糊半径
+    256 // 分辨率
+  );
+  scene.add(bloomPass);
+
+  const labelGroup = createCurve2DLabel();
+  // labelGroup.position.z = 0.1
+  scene.add(labelGroup);
+};
+
+const createCurve2DLabel = () => {
+  const labelGroup = new THREE.Group();
+  regions.forEach((region) => {
+    console.log(region,'region')
+    const cityDiv = document.createElement("div");
+    let number = Math.random() * 100;
+    number = number.toFixed(1);
+    cityDiv.className = "curve-mesh__label";
+    cityDiv.innerHTML = `
+      ${region.regionName}
+    `;
+    // cityDiv.textContent = ;
+    const cityLabel = new CSS2DObject(cityDiv);
+    cityLabel.position.copy(region.position);
+    // cityLabel.position.set(region.position);
+
+    labelGroup.add(cityLabel);
+    // regionMesh.add(cityLabel)
+  });
+
+  return labelGroup;
+};
+
+const createEffectComposer = () => {
+  composer = new EffectComposer(renderer);
+
+  composer.setSize(window.innerWidth, window.innerHeight);
+
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+};
+
+const createCurveLine = () => {
   const startCityPosition = regions[0].position;
-  const endCityPosition = regions[1].position;
+  const endCityPosition = regions[10].position;
+
+  // const pointArrays = [
+  //   new THREE.Vector3(startCityPosition[0], startCityPosition[1], 0),
+  //   new THREE.Vector3(
+  //     (startCityPosition[0] + endCityPosition[0]) / 2,
+  //     (startCityPosition[1] + endCityPosition[1]) / 2,
+  //     0.2
+  //   ),
+  //   new THREE.Vector3(endCityPosition[0], endCityPosition[1], 0),
+  // ];
 
   const pointArrays = [
-    new THREE.Vector3(startCityPosition[0], startCityPosition[1], 0),
-    new THREE.Vector3(
-      (startCityPosition[0] + endCityPosition[0]) / 2,
-      (startCityPosition[1] + endCityPosition[1]) / 2,
-      0.2
-    ),
-    new THREE.Vector3(endCityPosition[0], endCityPosition[1], 0),
+    startCityPosition,
+    startCityPosition.clone().lerp(endCityPosition, 0.5),
+    endCityPosition,
   ];
   const curve = new THREE.CatmullRomCurve3(pointArrays);
 
-  console.log(curve, "aa");
+  // console.log(curve, "aa");
   const points = curve.getPoints(100);
-
   const geometry = new LineGeometry();
 
   geometry.setPositions(points.map((p) => p.toArray()).flat());
@@ -432,7 +579,7 @@ const createCityCurve = () => {
   outLinePass.selectedObjects = [curveObject];
   outLinePass.edgeStrength = 1;
 
-  //   curveObject.scale.set(2, 2, 2);
+  curveObject.scale.set(2, 2, 2);
   scene.add(curveObject);
 };
 
@@ -478,11 +625,14 @@ const render = () => {
   controls.update();
   renderer.render(scene, camera);
   labelRenderer?.render(scene, camera);
+  composer?.render();
 };
 
 onMounted(async () => {
   await initMap();
   await getRegionCenterData(GuangZhou);
+
+  createEffectComposer();
   createLight();
   initCSS2DRender();
   initControls();
@@ -490,10 +640,10 @@ onMounted(async () => {
   // drawCityBoundary(GuangZhouBoundary);
   createCityPlane();
   // drawRegionGraph(GuangZhou);
-  drawRegionMeshGraph(GuangZhou);
+  // drawRegionMeshGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
-  // createCityCurve();
+  createCityCurve();
 });
 </script>
 <style lang="less" scoped>
@@ -540,5 +690,13 @@ onMounted(async () => {
   p {
     margin: 4px 0;
   }
+}
+
+:deep(.curve-mesh__label) {
+  background: #3f77c2;
+  color: #60cdf1;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #fff;
 }
 </style>
