@@ -28,9 +28,14 @@
     position: relative;
   }
   .screen-left {
-    padding-top: 90px;
+    padding-top: 70px;
     position: absolute;
     z-index: 11;
+    height: 100%;
+    display: flex;
+    .use-list {
+      padding-top: 40px;
+    }
   }
 }
 </style>

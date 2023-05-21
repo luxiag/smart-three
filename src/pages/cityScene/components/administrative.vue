@@ -21,6 +21,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { cloneDeep } from "lodash";
 import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
 let map, scene, camera, renderer, labelRenderer, controls, composer;
 const regions = [];
@@ -382,6 +383,7 @@ const createCityNameLabel = (position, cityName) => {
   const cityDiv = document.createElement("div");
   cityDiv.className = "city-label";
   cityDiv.textContent = cityName;
+  cityDiv.style = "font-size:12px;";
   const cityLabel = new CSS2DObject(cityDiv);
   const [x, y] = projection(position);
   if (cityName == "白云区") {
@@ -492,14 +494,6 @@ const createCityCurve = () => {
   composer?.addPass(sphereOutlinePass);
   scene.add(sphere);
 
-  const bloomPass = new BloomPass(
-    1, // 亮度阈值
-    25, // 泛光强度
-    4, // 模糊半径
-    256 // 分辨率
-  );
-  scene.add(bloomPass);
-
   const labelGroup = createCurve2DLabel();
   // labelGroup.position.z = 0.1
   scene.add(labelGroup);
@@ -508,7 +502,7 @@ const createCityCurve = () => {
 const createCurve2DLabel = () => {
   const labelGroup = new THREE.Group();
   regions.forEach((region) => {
-    console.log(region,'region')
+    console.log(region, "region");
     const cityDiv = document.createElement("div");
     let number = Math.random() * 100;
     number = number.toFixed(1);
@@ -535,6 +529,20 @@ const createEffectComposer = () => {
 
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5,
+    0.4,
+    0.85
+  );
+  // const bloomPass = new BloomPass(
+  //   1, // 亮度阈值
+  //   25, // 泛光强度
+  //   4, // 模糊半径
+  //   256 // 分辨率
+  // );
+  composer.addPass(bloomPass);
+  // scene.add(bloomPass);
 };
 
 const createCurveLine = () => {
@@ -583,12 +591,40 @@ const createCurveLine = () => {
   scene.add(curveObject);
 };
 
+const gdpObjection = {
+  天河区: 6215.72,
+  黄埔区: 4313.76,
+  越秀区: 3650.18,
+  番禺区: 2705.47,
+  海珠区: 2502.52,
+  白云区: 2476.2,
+  南沙区: 2252.58,
+  花都区: 1770.81,
+  增城区: 1325.27,
+  荔湾区: 1215.57,
+  从化区: 410.92,
+};
+
+const region3DBoundary = new THREE.Object3D();
+
+const region3D = [];
 const createRegion3DBoundary = (cityJSON) => {
-  const guangZhouMap = new THREE.Object3D();
+  const colors = ["#4966b6", "#127cac", "#ff8a8a"];
+  // const guangZhouMap = new THREE.Object3D();
   const features = cityJSON.features;
+
+  const highLine = [];
+  const lineGroup = new THREE.Group();
   features.forEach((feature, index) => {
     const properties = feature.properties;
+
+    const gdp = gdpObjection[properties.name];
+    const height = (gdpObjection[properties.name] / 1500) * 0.1;
+
+    let color = gdp > 4000 ? colors[2] : gdp > 2000 ? colors[1] : colors[0];
+
     const cityLabel = createCityNameLabel(properties.center, properties.name);
+    cityLabel.position.z = height;
     const coordinates = feature.geometry.coordinates;
     if (feature.geometry.type === "MultiPolygon") {
       coordinates.forEach((coordinate) => {
@@ -606,48 +642,102 @@ const createRegion3DBoundary = (cityJSON) => {
           // 面
           const lineGeometry = new THREE.BufferGeometry();
           lineGeometry.setFromPoints(pointsArray);
-          const lineColor = new THREE.Color(
-            Math.random() * 0.5 + 0.5,
-            Math.random() * 0.5 + 0.5,
-            Math.random() * 0.5 + 0.5
-          );
+
           const lineMaterial = new THREE.LineBasicMaterial({
-            color: lineColor,
+            // color: lineColor,
+            color: new THREE.Color("#fff"),
           });
           const line = new THREE.Line(lineGeometry, lineMaterial);
-          guangZhouMap.add(line);
+          line.position.z = height - 0.1;
+
+          highLine.push(line);
+          region3DBoundary.add(line);
 
           const extrudeSettings = {
-            depth: 0.1,
+            depth: height,
             bevelEnabled: false,
             bevelSegments: 1,
             bevelThickness: 0.2,
           };
           const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
           const material = new THREE.MeshBasicMaterial({
-            color: 0xff0000,
-            opacity: 0.1,
+            // color: 0xff0000,
+            opacity: 0.5,
             transparent: true,
+            // color: lineColor,
+            color: new THREE.Color(color),
             // wireframe: true,
             // side: THREE.DoubleSide,
             // color: bgColor,
             // color:color[bgColorIdx]
           });
-          const material1 = new THREE.MeshStandardMaterial({
-            vertexColors: THREE.VertexColors,
-            opacity: 0.5,
+          const material1 = new THREE.MeshBasicMaterial({
+            // vertexColors: THREE.VertexColors,
+            opacity: 0.8,
             transparent: true,
-
+            // color: lineColor,
+            color: new THREE.Color(color),
             // color: color,
           });
           const mesh = new THREE.Mesh(geometry, [material, material1]);
+          region3D.push(mesh);
           mesh.add(cityLabel);
-          guangZhouMap.add(mesh);
+          region3DBoundary.add(mesh);
         });
       });
     }
   });
-  scene.add(guangZhouMap);
+
+  // bloom
+  const lineOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  lineOutlinePass.renderToScreen = true;
+  lineOutlinePass.edgeStrength = 20;
+  lineOutlinePass.edgeGlow = 20;
+  // 设置轮廓边框的粗细
+  lineOutlinePass.edgeThickness = 30;
+  // lineOutlinePass.pulsePeriod = 1;
+  lineOutlinePass.visibleEdgeColor.set("#FFf");
+  console.log(highLine, composer, "highLine");
+  lineOutlinePass.selectedObjects = highLine;
+  composer?.addPass(lineOutlinePass);
+
+  region3DBoundary.position.z = -0.1;
+  scene.add(region3DBoundary);
+  // createGDPBar();
+  window.addEventListener("mousemove", createGDPBar);
+};
+
+const GDPBar = new THREE.Object3D();
+const raycaster = new THREE.Raycaster();
+let cacheRegion3DObj, cacheRegion3DColor, cacheRegionGDBBar;
+
+const createGDPBar = (event) => {
+  const pointer = new THREE.Vector2();
+
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  // console.log(region3D, region3DBoundary, "region3D");
+  const interects = raycaster.intersectObjects(region3D, false);
+  if (interects.length > 0) {
+    if (cacheRegion3DObj?.object.uuid == interects[0].object.uuid) return;
+    if (cacheRegion3DObj) {
+      cacheRegion3DObj.object.material[0].color = cacheRegion3DColor;
+      cacheRegion3DObj.object.material[1].color = cacheRegion3DColor;
+    }
+    cacheRegion3DObj = interects[0];
+    cacheRegion3DColor = interects[0].object.material[0].color;
+
+    console.log(interects[0].object.material);
+    interects[0].object.material[0].color = new THREE.Color("#ff8a8a");
+    interects[0].object.material[1].color = new THREE.Color("#ff8a8a");
+  }
+  console.log(region3D);
+  console.log(interects, "interface");
 };
 
 const animate = () => {
@@ -673,12 +763,12 @@ onMounted(async () => {
   animate();
   // drawCityBoundary(GuangZhouBoundary);
   createCityPlane();
-  // createRegion3DBoundary(GuangZhou);
+  createRegion3DBoundary(GuangZhou);
   // drawRegionGraph(GuangZhou);
   // drawRegionMeshGraph(GuangZhou);
   //   cubeTest();
   initAxesHelper();
-  createCityCurve();
+  // createCityCurve();
 });
 </script>
 <style lang="less" scoped>

@@ -1,6 +1,8 @@
 <template>
   <container>
-    <template v-slot:left> </template>
+    <template v-slot:left>
+      <leftEchart />
+    </template>
     <template v-slot:left-use>
       <div
         :class="activeCompName == 'administrative' ? 'use active' : 'use'"
@@ -20,6 +22,12 @@
       >
         生态环境
       </div>
+      <div
+        :class="activeCompName == 'ecology' ? 'use active' : 'use'"
+        @click="switchComponent('ecology')"
+      >
+        经济分布
+      </div>
     </template>
     <template v-slot:right> </template>
     <template v-slot:center>
@@ -33,6 +41,8 @@ import ecology from "./components/ecology.vue";
 import economics from "./components/economics.vue";
 import population from "./components/population.vue";
 import technological from "./components/technological.vue";
+
+import leftEchart from "./components/leftEchart.vue";
 
 import container from "@/components/container.vue";
 
