@@ -4,9 +4,11 @@
   </div>
 </template>
 <script setup>
+import { nextTick } from "vue";
 import GuangZhou from "@/assets/json/GuangZhou.json";
 import GuangZhouBoundary from "@/assets/json/GuangZhouBoundary.json";
 import * as THREE from "three";
+import * as echarts from "echarts";
 import { onMounted } from "vue";
 import * as d3 from "d3";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -608,6 +610,8 @@ const gdpObjection = {
 const region3DBoundary = new THREE.Object3D();
 
 const region3D = [];
+let GDBBarCssObj = null;
+let GDBDiv;
 const createRegion3DBoundary = (cityJSON) => {
   const colors = ["#4966b6", "#127cac", "#ff8a8a"];
   // const guangZhouMap = new THREE.Object3D();
@@ -704,14 +708,80 @@ const createRegion3DBoundary = (cityJSON) => {
   console.log(highLine, composer, "highLine");
   lineOutlinePass.selectedObjects = highLine;
   composer?.addPass(lineOutlinePass);
+  GDBDiv = document.createElement("div");
+  // GDBDiv.id = "GDB-bar";
+  GDBDiv.innerHTML =
+    '<div id="GDB-bar-echart" class="GDB-bar-echart">GDB-Bar</div>';
+  GDBBarCssObj = new CSS2DObject(GDBDiv);
+  GDBBarCssObj.visible = false;
+
+  region3DBoundary.add(GDBBarCssObj);
 
   region3DBoundary.position.z = -0.1;
   scene.add(region3DBoundary);
+
   // createGDPBar();
   window.addEventListener("mousemove", createGDPBar);
+  // nextTick(() => {
+  //   createGDPBarEchart();
+  // });
+  console.log(GDBDiv.getElementsByClassName("GDB-bar-echart")[0], "GDBDiv");
 };
 
-const GDPBar = new THREE.Object3D();
+const createGDPBarEchart = () => {
+  // const chartDom
+  const chartDom = GDBDiv.getElementsByClassName("GDB-bar-echart")[0];
+  // chartDom.style = "min-width:260px;min-height:200px;";
+  // console.log(chartDom.clientWidth, "chartDom");
+  // if (!chartDom) return;
+  const GDBBar = echarts.init(chartDom);
+  const options = {
+    xAxis: {
+      type: "category",
+      data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023"],
+      axisLabel: {
+        color: "#fff",
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: {
+        color: "#fff",
+      }
+    },
+    color: [
+      "#64c9da",
+      "#84dae5",
+      "#c5f5fc",
+      "#fafffe",
+      "#66c5d2",
+      "#82dae7",
+      "#cbf6fe",
+    ],
+    series: [
+      {
+        data: [120, 200, 150, 80, 70, 110, 130],
+        colorBy:'data',
+        distance:0,
+        type: "bar",
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: "#83bff6" },
+            { offset: 0.5, color: "#188df0" },
+            { offset: 1, color: "#188df0" },
+          ]),
+        },
+      },
+    ],
+    grid:{
+      top:40,
+      bottom:40,
+      left:40
+    }
+  };
+  GDBBar.setOption(options);
+};
+
 const raycaster = new THREE.Raycaster();
 let cacheRegion3DObj, cacheRegion3DColor, cacheRegionGDBBar;
 
@@ -733,11 +803,24 @@ const createGDPBar = (event) => {
     cacheRegion3DColor = interects[0].object.material[0].color;
 
     console.log(interects[0].object.material);
-    interects[0].object.material[0].color = new THREE.Color("#ff8a8a");
-    interects[0].object.material[1].color = new THREE.Color("#ff8a8a");
+    interects[0].object.material[0].color = new THREE.Color("#69F0AE");
+    interects[0].object.material[1].color = new THREE.Color("#69F0AE");
+    GDBBarCssObj.position.copy(interects[0].point);
+    GDBBarCssObj.visible = true;
+
+    createGDPBarEchart();
+    console.log(interects, "interface");
+  } else {
+    GDBBarCssObj.visible = false;
+    if (cacheRegion3DObj) {
+      cacheRegion3DObj.object.material[0].color = cacheRegion3DColor;
+      cacheRegion3DObj.object.material[1].color = cacheRegion3DColor;
+      cacheRegion3DObj = null;
+    }
   }
-  console.log(region3D);
-  console.log(interects, "interface");
+  // const chartDom = GDBDiv.getElementsByClassName("GDB-bar-echart")[0];
+
+  // console.log(chartDom.clientWidth, "chartDom height");
 };
 
 const animate = () => {
@@ -823,5 +906,10 @@ onMounted(async () => {
   font-size: 12px;
   padding: 2px 4px;
   border: 1px solid #fff;
+}
+:deep(#GDB-bar-echart) {
+  width: 280px;
+  height: 200px;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 </style>
