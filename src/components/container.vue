@@ -37,5 +37,13 @@
       padding-top: 120px;
     }
   }
+  .screen-right {
+    position: absolute;
+    height: 100%;
+    right: 0;
+    display: flex;
+    width: 280px;
+    z-index: 11;
+  }
 }
 </style>

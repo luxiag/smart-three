@@ -3,7 +3,9 @@
     <div class="first-echart">
       <div ref="alarmSituationRef"></div>
     </div>
-    <div class="second-echart"></div>
+    <div class="second-echart">
+      <div ref="radarEChartRef"></div>
+    </div>
     <div class="third-echart"></div>
   </div>
 </template>
@@ -63,15 +65,19 @@ const createAlarmSituation = () => {
       axisPointer: {
         type: "shadow",
         textStyle: {
-          color: "rgba(255, 255, 255, 0.65)",
+          color: "rgba(255, 255, 255, 1)",
         },
       },
+      textStyle:{
+        color:'#fff'
+      },
+      backgroundColor:"rgba(0,0,0,0.6)"
     },
     legend: {
       data: nameVal,
       selectedMode: false, //图例禁止点击
       orient: "vertical",
-      x: "85%",
+      x: "80%",
       y: "45%",
       itemWidth: 18,
       itemHeight: 10,
@@ -83,8 +89,8 @@ const createAlarmSituation = () => {
         fontSize: 12,
       },
     },
-    grid:{
-        left:10
+    grid: {
+      left: 10,
     },
     series: [
       {
@@ -338,13 +344,165 @@ const createAlarmSituation = () => {
   fanAlarmEchart.setOption(option);
 };
 
+// intelligent manufacturing
+
+const radarEChartRef = ref();
+const createRadarEchart = () => {
+  const radarEchart = echarts.init(radarEChartRef.value);
+  const randomData = [
+    { name: "智能制造", max: 88 },
+    { name: "工业4.0", max: 88 },
+    { name: "车间自动化", max: 88 },
+    { name: "生产线自动化", max: 88 },
+    { name: "人工智能", max: 88 },
+    { name: "机器学习", max: 88 },
+    { name: "物联网", max: 88 },
+    { name: "云计算", max: 88 },
+    { name: "大数据", max: 88 },
+    { name: "数据分析", max: 88 },
+    { name: "数据可视化", max: 88 },
+    { name: "供应链管理", max: 88 },
+    { name: "产品生命周期管理", max: 88 },
+    { name: "产品设计", max: 88 },
+    { name: "数字化工厂", max: 88 },
+    { name: "传感器技术", max: 88 },
+    { name: "嵌入式系统", max: 88 },
+    { name: "自主控制技术", max: 88 },
+    { name: "国际标准", max: 88 },
+    { name: "设备互联网络", max: 88 },
+  ];
+  const firstData = [];
+  const secondData = [];
+  for (let i = 0; i < 20; i++) {
+    const d = Math.random() * 100;
+    firstData.push(d);
+    const m = Math.random() * 100;
+    secondData.push(m);
+  }
+  const option = {
+    // backgroundColor: "#0A2E5D",
+    normal: {
+      top: 200,
+      left: 300,
+      width: 500,
+      height: 400,
+      zIndex: 6,
+      backgroundColor: "",
+    },
+    // color: ["rgba(245, 166, 35, 1)", "rgba(19, 173, 255, 1)"],
+    tooltip: {
+      show: false,
+      trigger: "item",
+    },
+    legend: {
+      show: true,
+      icon: "circle",
+      left: "35%",
+      top: "90%",
+      orient: "horizontal",
+      textStyle: {
+        fontSize: 14,
+        color: "#eee",
+      },
+      //   data: ["高一(1)班", "高一(2)班"],
+    },
+    radar: {
+      center: ["50%", "50%"],
+      radius: "50%",
+      startAngle: 90,
+      splitNumber: 4,
+      shape: "circle",
+      splitArea: {
+        areaStyle: {
+          color: ["#283036", "#333e49"],
+          opacity: 0.5,
+        },
+      },
+      axisLabel: {
+        show: false,
+        fontSize: 18,
+        color: "#9E9E9E",
+        fontStyle: "normal",
+        fontWeight: "normal",
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "#9E9E9E", //
+        },
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: "#9E9E9E", //
+        },
+      },
+      indicator: randomData,
+    },
+    series: [
+      {
+        name: "预期",
+        type: "radar",
+        symbol: "circle",
+        symbolSize: 10,
+        areaStyle: {
+          normal: {
+            color: "rgba(52, 68, 186, 0.4)",
+          },
+        },
+        itemStyle: {
+          color: "rgba(52, 68, 186, 1)",
+          borderColor: "rgba(52, 68, 186, 0.3)",
+          borderWidth: 10,
+        },
+        lineStyle: {
+          normal: {
+            type: "solid",
+
+            color: "rgba(52, 68, 186, 1)",
+            width: 2,
+          },
+        },
+        data: [firstData],
+      },
+      {
+        name: "实际",
+        type: "radar",
+        symbol: "circle",
+        symbolSize: 10,
+        itemStyle: {
+          normal: {
+            color: "rgba(19, 173, 255, 1)",
+            borderColor: "rgba(19, 173, 255, 0.4)",
+            borderWidth: 10,
+          },
+        },
+        areaStyle: {
+          normal: {
+            color: "rgba(19, 173, 255, 0.5)",
+          },
+        },
+        lineStyle: {
+          normal: {
+            color: "rgba(19, 173, 255, 1)",
+            width: 2,
+            type: "solid",
+          },
+        },
+        data: [secondData],
+      },
+    ],
+  };
+  radarEchart.setOption(option);
+};
 onMounted(() => {
   createAlarmSituation();
+  createRadarEchart();
 });
 </script>
 <style lang="less" scoped>
 .left-echart--cityScene {
-  min-width: 260px;
+  min-width: 280px;
   height: 100%;
 
   display: flex;

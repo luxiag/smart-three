@@ -29,7 +29,9 @@
         经济分布
       </div>
     </template>
-    <template v-slot:right> </template>
+    <template v-slot:right>
+      <rightEchart />
+    </template>
     <template v-slot:center>
       <component :is="activeComponent[activeCompName]"></component>
     </template>
@@ -43,6 +45,7 @@ import population from "./components/population.vue";
 import technological from "./components/technological.vue";
 
 import leftEchart from "./components/leftEchart.vue";
+import rightEchart from "./components/rightEchart.vue";
 
 import container from "@/components/container.vue";
 
