@@ -74,6 +74,8 @@ const loader = new THREE.TextureLoader();
 const setting = {
   geoMapHeight: -0.1,
 };
+
+const css2dLabelObj = {};
 const activeCompName = ref("");
 
 const initMap = () => {
@@ -250,27 +252,18 @@ const createCityPlane = () => {
 const guangZhouRegionMap = new THREE.Object3D();
 
 const showRegionGraph = () => {
+  activeCompName.value = "administrative";
+  // composer.passes.length = 0;
   hideAllObject(guangZhouRegionMap);
-  console.log(guangZhouRegionMap, "guangZhouRegionMap");
-  nextTick(() => {
-    composer.passes.length = 0;
-    activeCompName.value = "administrative";
-    if (
-      guangZhouRegionMap &&
-      guangZhouRegionMap.children.length > 0 &&
-      guangZhouRegionMap.visible == false
-    ) {
-      console.log("b");
-      guangZhouRegionMap.visible = true;
-    } else if (guangZhouRegionMap.children.length == 0) {
-      console.log("a");
-      drawRegionGraph(GuangZhou);
-    }
-  });
+  guangZhouRegionMap.visible = true;
+  if (guangZhouRegionMap.children.length == 0) {
+    drawRegionGraph(GuangZhou);
+  }
 };
 
 const drawRegionGraph = (geoJson) => {
   const features = geoJson.features;
+  const labelArr = [];
   const color = [
     "#f09135",
     "#eb4629",
@@ -280,9 +273,11 @@ const drawRegionGraph = (geoJson) => {
     "#ec6bdc",
   ];
 
+
   features.forEach((feature, index) => {
     const properties = feature.properties;
     const cityLabel = createCityNameLabel(properties.center, properties.name);
+    labelArr.push(cityLabel);
     const coordinates = feature.geometry.coordinates;
     if (feature.geometry.type === "MultiPolygon") {
       coordinates.forEach((coordinate) => {
@@ -309,6 +304,8 @@ const drawRegionGraph = (geoJson) => {
           const material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
             color: bgColor,
+            needsBloom: false,
+            transparent: true,
             // map: meshTexture,
 
             // color:color[bgColorIdx]
@@ -322,6 +319,8 @@ const drawRegionGraph = (geoJson) => {
   });
   // composer.reset(renderer)
   // console.log(guangZhouRegionMap, "aa");
+  css2dLabelObj[guangZhouRegionMap.uuid] = labelArr;
+
   scene.add(guangZhouRegionMap);
 };
 
@@ -362,24 +361,17 @@ const guangZhouMeshMap = new THREE.Object3D();
 
 const showRegionMeshGraph = () => {
   activeCompName.value = "ecology";
-  hideAllObject();
 
-  nextTick(() => {
-    if (gzPlane && gzPlane.visible == false) {
-      gzPlane.visible = true;
-    } else {
-      createCityPlane();
-    }
+  hideAllObject([gzPlane, guangZhouMeshMap]);
 
-    if (
-      guangZhouMeshMap.children.length > 0 &&
-      guangZhouMeshMap.visible == false
-    ) {
-      guangZhouMeshMap.visible = true;
-    } else {
-      drawRegionMeshGraph(GuangZhou);
-    }
-  });
+  if (!gzPlane) {
+    createCityPlane();
+  }
+  gzPlane.visible = true;
+  guangZhouMeshMap.visible = true;
+  if (guangZhouMeshMap.children.length == 0) {
+    drawRegionMeshGraph(GuangZhou);
+  }
 };
 
 const drawRegionMeshGraph = (geoJson) => {
@@ -416,7 +408,6 @@ const drawRegionMeshGraph = (geoJson) => {
           );
 
           loader.loadAsync("/imgs/mesh.jpeg").then((meshTexture) => {
-            console.log(meshTexture, "aaaaa");
             meshTexture.wrapS = THREE.RepeatWrapping;
             meshTexture.wrapT = THREE.RepeatWrapping;
 
@@ -440,6 +431,9 @@ const drawRegionMeshGraph = (geoJson) => {
   guangZhouMeshMap.position.z = setting.geoMapHeight + 0.01;
   camera.rotateZ(Math.PI / 2);
   guangZhouMeshMap.add(labelGroup);
+  console.log(guangZhouMeshMap, "guangZhouMeshMap");
+  css2dLabelObj[guangZhouMeshMap.uuid] = labelGroup.children;
+  // console.log(labelGroup, "labelGroup", css2dLabelObj);
   // console.log(labelGroup.children)
   // scene.add(labelGroup);
   scene.add(guangZhouMeshMap);
@@ -482,23 +476,28 @@ const showRegionCurve = () => {
   activeCompName.value = "population";
 
   hideAllObject([curveObjArr, gzPlane]);
-
-  if (gzPlane && gzPlane.visible == false) {
-    gzPlane.visible = true;
-  } else if (!gzPlane) {
+  gzPlane.visible = true;
+  curveObjArr.visible = true;
+  if (!gzPlane) {
     createCityPlane();
   }
 
-  if (curveObjArr.children.length > 0 && curveObjArr.visible == false) {
-    curveObjArr.visible = true;
-    if (composer) {
-      cacheOutlinePassArr.forEach((outlinePass) => {
-        composer.addPass(outlinePass);
-      });
-    } else {
-    }
-  } else if (curveObjArr.children.length == 0) {
-    console.log('--')
+  // if (curveObjArr.children.length > 0 && curveObjArr.visible == false) {
+
+  //   if (composer) {
+  //     cacheOutlinePassArr.forEach((outlinePass) => {
+  //       composer.addPass(outlinePass);
+  //     });
+  //   } else {
+  //   }
+  // }
+  // if (composer.passes.length == 0 && curveObjArr.children.length > 0) {
+  //   cacheOutlinePassArr.forEach((outlinePass) => {
+  //     composer.addPass(outlinePass);
+  //   });
+  // }
+
+  if (curveObjArr.children.length == 0) {
     createCityCurve();
   }
 };
@@ -598,6 +597,7 @@ const createCityCurve = () => {
 
   const labelGroup = createCurve2DLabel();
   curveObjArr.add(labelGroup);
+  css2dLabelObj[curveObjArr.uuid] = labelGroup.children;
   scene.add(curveObjArr);
 
   // labelGroup.position.z = 0.1
@@ -634,20 +634,20 @@ const createEffectComposer = () => {
 
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
-  // const bloomPass = new UnrealBloomPass(
-  //   new THREE.Vector2(window.innerWidth, window.innerHeight),
-  //   1.5,
-  //   0.4,
-  //   0.85
-  // );
-  // const bloomPass = new BloomPass(
-  //   1, // 亮度阈值
-  //   25, // 泛光强度
-  //   0.01, // 模糊半径
-  //   256 // 分辨率
-  // );
-  // composer.addPass(bloomPass);
-  // scene.add(bloomPass);
+  const unrealBloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5,
+    0.4,
+    0.85
+  );
+  const bloomPass = new BloomPass(
+    1, // 亮度阈值
+    25, // 泛光强度
+    0.01, // 模糊半径
+    256 // 分辨率
+  );
+  composer.addPass(unrealBloomPass);
+  scene.add(bloomPass);
 };
 
 const createCurveLine = () => {
@@ -714,20 +714,11 @@ const region3DBoundary = new THREE.Object3D();
 
 const showRegion3DBoundary = () => {
   activeCompName.value = "economics";
-  const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
-    1.5,
-    0.4,
-    0.85
-  );
-  composer.addPass(bloomPass);
-
-  if (
-    region3DBoundary.children.length > 0 &&
-    region3DBoundary.visible == false
-  ) {
-    region3DBoundary.visible = true;
-  } else {
+  hideAllObject(region3DBoundary);
+  // composer.addPass(bloomPass);
+  gzPlane.visible = true;
+  region3DBoundary.visible = true;
+  if (region3DBoundary.children.length == 0) {
     createRegion3DBoundary(GuangZhou);
   }
 };
@@ -739,7 +730,7 @@ const createRegion3DBoundary = (cityJSON) => {
   const colors = ["#4966b6", "#127cac", "#ff8a8a"];
   // const guangZhouMap = new THREE.Object3D();
   const features = cityJSON.features;
-
+  const labelArr = []
   const highLine = [];
   features.forEach((feature, index) => {
     const properties = feature.properties;
@@ -751,6 +742,7 @@ const createRegion3DBoundary = (cityJSON) => {
 
     const cityLabel = createCityNameLabel(properties.center, properties.name);
     cityLabel.position.z = height;
+    labelArr.push(cityLabel)
     const coordinates = feature.geometry.coordinates;
     if (feature.geometry.type === "MultiPolygon") {
       coordinates.forEach((coordinate) => {
@@ -840,7 +832,7 @@ const createRegion3DBoundary = (cityJSON) => {
 
   region3DBoundary.position.z = -0.1;
   scene.add(region3DBoundary);
-
+  css2dLabelObj[region3DBoundary.uuid] = labelArr
   // createGDPBar();
   window.addEventListener("mousemove", createGDPBar);
   // nextTick(() => {
@@ -951,6 +943,27 @@ const hideAllObject = (noHideObj) => {
   } else {
     uuids = [noHideObj.uuid];
   }
+
+  const passes = composer.passes;
+  if (passes.includes()) {
+  }
+
+  for (let prop in css2dLabelObj) {
+    if (!uuids.includes(prop)) {
+      const labels = css2dLabelObj[prop];
+      console.log(labels, "labels");
+      labels.forEach((label) => {
+        // label.element.style.display = "none";
+        label.visible = false;
+      });
+    } else {
+      const labels = css2dLabelObj[prop];
+      labels.forEach((label) => {
+        label.visible = true;
+      });
+    }
+  }
+
   const AllObject = [
     guangZhouRegionMap,
     curveObjArr,
