@@ -76,7 +76,6 @@ const initMap = () => {
 };
 
 onMounted(() => {
-  console.log("aaa");
   initMap();
 });
 </script>

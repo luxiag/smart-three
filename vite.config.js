@@ -10,6 +10,7 @@ const pathResolve = (dir) => {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base:'/threejs-city/',
   resolve: {
     alias: {
       "@": pathResolve("src"),
