@@ -255,6 +255,8 @@ const showRegionGraph = () => {
   activeCompName.value = "administrative";
   // composer.passes.length = 0;
   hideAllObject(guangZhouRegionMap);
+
+  console.log(guangZhouMeshMap, "a");
   guangZhouRegionMap.visible = true;
   if (guangZhouRegionMap.children.length == 0) {
     drawRegionGraph(GuangZhou);
@@ -272,7 +274,6 @@ const drawRegionGraph = (geoJson) => {
     "#7ad349",
     "#ec6bdc",
   ];
-
 
   features.forEach((feature, index) => {
     const properties = feature.properties;
@@ -719,7 +720,11 @@ const showRegion3DBoundary = () => {
   gzPlane.visible = true;
   region3DBoundary.visible = true;
   if (region3DBoundary.children.length == 0) {
+    console.log("a");
     createRegion3DBoundary(GuangZhou);
+  } else {
+    console.log("b");
+    window.addEventListener("mousemove", createGDPBar);
   }
 };
 
@@ -730,7 +735,7 @@ const createRegion3DBoundary = (cityJSON) => {
   const colors = ["#4966b6", "#127cac", "#ff8a8a"];
   // const guangZhouMap = new THREE.Object3D();
   const features = cityJSON.features;
-  const labelArr = []
+  const labelArr = [];
   const highLine = [];
   features.forEach((feature, index) => {
     const properties = feature.properties;
@@ -742,7 +747,7 @@ const createRegion3DBoundary = (cityJSON) => {
 
     const cityLabel = createCityNameLabel(properties.center, properties.name);
     cityLabel.position.z = height;
-    labelArr.push(cityLabel)
+    labelArr.push(cityLabel);
     const coordinates = feature.geometry.coordinates;
     if (feature.geometry.type === "MultiPolygon") {
       coordinates.forEach((coordinate) => {
@@ -825,16 +830,19 @@ const createRegion3DBoundary = (cityJSON) => {
   // GDBDiv.id = "GDB-bar";
   GDBDiv.innerHTML =
     '<div id="GDB-bar-echart" class="GDB-bar-echart">GDB-Bar</div>';
+    GDBDiv.style ='height:200px;width:280px;'
   GDBBarCssObj = new CSS2DObject(GDBDiv);
-  GDBBarCssObj.visible = false;
+  GDBBarCssObj.visible = true;
+  GDBBarCssObj.position.y = 100000;
 
   region3DBoundary.add(GDBBarCssObj);
 
   region3DBoundary.position.z = -0.1;
   scene.add(region3DBoundary);
-  css2dLabelObj[region3DBoundary.uuid] = labelArr
-  // createGDPBar();
+  css2dLabelObj[region3DBoundary.uuid] = labelArr;
   window.addEventListener("mousemove", createGDPBar);
+
+  // createGDPBar();
   // nextTick(() => {
   //   createGDPBarEchart();
   // });
@@ -844,6 +852,7 @@ const createRegion3DBoundary = (cityJSON) => {
 const createGDPBarEchart = () => {
   // const chartDom
   const chartDom = GDBDiv.getElementsByClassName("GDB-bar-echart")[0];
+  console.log(chartDom, chartDom.clientWidth);
   // chartDom.style = "min-width:260px;min-height:200px;";
   // console.log(chartDom.clientWidth, "chartDom");
   // if (!chartDom) return;
@@ -963,6 +972,7 @@ const hideAllObject = (noHideObj) => {
       });
     }
   }
+  window.removeEventListener("mousemove", createGDPBar);
 
   const AllObject = [
     guangZhouRegionMap,
@@ -1005,7 +1015,7 @@ onMounted(async () => {
   initCSS2DRender();
   initControls();
   animate();
-
+  console.log(composer, "composer");
   // drawCityBoundary(GuangZhouBoundary);
 
   createCityPlane();
