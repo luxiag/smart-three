@@ -647,8 +647,9 @@ const createEffectComposer = () => {
     0.01, // 模糊半径
     256 // 分辨率
   );
+  // composer.add(bloomPass)
   composer.addPass(unrealBloomPass);
-  scene.add(bloomPass);
+  // scene.add(bloomPass);
 };
 
 const createCurveLine = () => {
@@ -848,7 +849,7 @@ const createRegion3DBoundary = (cityJSON) => {
   // });
   // console.log(GDBDiv.getElementsByClassName("GDB-bar-echart")[0], "GDBDiv");
 };
-
+let GDBBar;
 const createGDPBarEchart = () => {
   // const chartDom
   const chartDom = GDBDiv.getElementsByClassName("GDB-bar-echart")[0];
@@ -856,7 +857,9 @@ const createGDPBarEchart = () => {
   // chartDom.style = "min-width:260px;min-height:200px;";
   // console.log(chartDom.clientWidth, "chartDom");
   // if (!chartDom) return;
-  const GDBBar = echarts.init(chartDom);
+  if(!GDBBar) {
+    GDBBar= echarts.init(chartDom);
+  }
   const options = {
     xAxis: {
       type: "category",

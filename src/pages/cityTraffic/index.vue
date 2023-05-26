@@ -37,6 +37,12 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass";
 import { debounce } from "@/utils/lang.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Sky } from "three/examples/jsm/objects/Sky";
@@ -55,7 +61,7 @@ const switchComponent = (componentName) => {
   activeCompName.value = componentName;
 };
 
-let scene, camera, renderer, controls, labelRenderer;
+let scene, camera, renderer, controls, labelRenderer, composer;
 const loader = new THREE.FileLoader();
 const textureLoader = new THREE.TextureLoader();
 const manager = new THREE.LoadingManager();
@@ -80,12 +86,14 @@ const initMap = () => {
     });
     // scene.background = new THREE.Color(0x0a0f12);
     camera = new THREE.PerspectiveCamera(
-      75,
+      70,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.set(65, 20, 0);
+    camera.position.set(70, 24, 0);
+    camera.rotation.set(-1.6, 1, 1);
+    // camera.lookAt(60,0,0)
     scene.add(camera);
 
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -96,6 +104,9 @@ const initMap = () => {
     renderer.render(scene, camera);
     window.addEventListener("resize", debounce(onWindowResize));
     resolve();
+    window.addEventListener("click", () => {
+      console.log(camera, "camera");
+    });
   });
 };
 
@@ -110,10 +121,10 @@ const initControls = () => {
 };
 
 const createLight = () => {
-  const light = new THREE.AmbientLight(0xffffff, 0.6); // soft white light
+  const light = new THREE.AmbientLight(0xfff5ee, 0.4); // soft white light
   scene.add(light);
 
-  const pointLight = new THREE.PointLight(0xffffff, 1, 400);
+  const pointLight = new THREE.DirectionalLight(0xfff5ee, 0.8);
   pointLight.position.set(50, 50, 0);
   scene.add(pointLight);
 
@@ -122,6 +133,29 @@ const createLight = () => {
   const sphere = new THREE.Mesh(geometry, material);
   sphere.position.set(50, 50, 0);
   scene.add(sphere);
+};
+
+const createComposer = () => {
+  composer = new EffectComposer(renderer);
+
+  composer.setSize(window.innerWidth, window.innerHeight);
+
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  const unrealBloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5,
+    0.4,
+    0.85
+  );
+  const bloomPass = new BloomPass(
+    1, // 亮度阈值
+    25, // 泛光强度
+    0.01, // 模糊半径
+    256 // 分辨率
+  );
+  // composer.addPass(bloomPass)
+  // composer.addPass(unrealBloomPass);
 };
 
 const initCSS2DRender = () => {
@@ -155,7 +189,7 @@ const render = () => {
   controls.update();
   renderer.render(scene, camera);
   labelRenderer?.render(scene, camera);
-  // composer?.render();
+  composer?.render();
 };
 
 const createCity = () => {
@@ -172,6 +206,7 @@ const createCity = () => {
   };
   gltfLoader.load("/models/ground.glb", (gltf) => {
     const mesh = gltf.scene;
+
     mesh.position.set(-100, 0, 0);
 
     scene.add(mesh);
@@ -226,15 +261,117 @@ const createSkyAndSun = () => {
   scene.environment = renderTarget.texture;
 };
 
+const createInnerCircle = () => {
+  // const cylinderGeometry = new THREE.CylinderGeometry(10,84,1);
+  // const cylinderMaterial = [
+  //   new THREE.MeshBasicMaterial({
+  //     side:THREE.DoubleSide,
+  //     transparent:true
+  //   }),
+
+  // ]
+
+  const circleGeometry = new THREE.CircleGeometry(10, 84);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    opacity: 0.2,
+    transparent: true,
+  });
+
+  const circle = new THREE.Mesh(circleGeometry, material);
+  circle.rotateX(-Math.PI / 2);
+  circle.position.y = 10;
+  circle.position.x = 20;
+
+  const ringGeometry = new THREE.RingGeometry(10, 10.1, 84);
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+  });
+
+  const ringOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  ringOutlinePass.edgeStrength = 2;
+  ringOutlinePass.edgeGlow = 6;
+  // 设置轮廓边框的粗细
+  ringOutlinePass.edgeThickness = 3;
+  // ringOutlinePass.pulsePeriod = 1;
+  ringOutlinePass.visibleEdgeColor.set("#304FFE");
+
+  const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+  ringMesh.position.set(20, 10, 0);
+  ringMesh.rotateX(-Math.PI / 2);
+
+  ringOutlinePass.selectedObjects = [ringMesh];
+
+  composer.addPass(ringOutlinePass);
+
+  scene.add(ringMesh);
+  scene.add(circle);
+};
+
+const createOutCircle = () => {
+  const circleGeometry = new THREE.CircleGeometry(15, 84);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    opacity: 0.2,
+    transparent: true,
+  });
+
+  const circle = new THREE.Mesh(circleGeometry, material);
+  circle.rotateX(-Math.PI / 2);
+  circle.position.y = 10;
+  circle.position.x = 20;
+
+  const ringGeometry = new THREE.RingGeometry(15, 15.1, 84);
+  const ringMaterial = new THREE.LineDashedMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    linewidth: 2,
+    scale: 2,
+    dashSize: 3,
+    gapSize: 3,
+  });
+
+  const ringOutlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  ringOutlinePass.edgeStrength = 2;
+  ringOutlinePass.edgeGlow = 6;
+  // 设置轮廓边框的粗细
+  ringOutlinePass.edgeThickness = 3;
+  // ringOutlinePass.pulsePeriod = 1;
+  ringOutlinePass.visibleEdgeColor.set("#304FFE");
+
+  const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+  ringMesh.position.set(20, 10, 0);
+  ringMesh.rotateX(-Math.PI / 2);
+
+  ringOutlinePass.selectedObjects = [ringMesh];
+
+  composer.addPass(ringOutlinePass);
+
+  scene.add(ringMesh);
+  scene.add(circle);
+};
+
 onMounted(async () => {
   await initMap();
   await initCSS2DRender();
+  createComposer();
 
   initControls();
   createLight();
   initAxesHelper();
 
   createCity();
+  createInnerCircle();
+  createOutCircle();
   // createSkyAndSun();
 
   animate();
