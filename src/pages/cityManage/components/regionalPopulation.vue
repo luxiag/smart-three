@@ -17,6 +17,7 @@ const initMap = () => {
     // 是否显示信息窗口
     // infoBox: false,
     // 是否显示查询按钮
+    animation: true,
     geocoder: false,
     // 不显示home按钮
     homeButton: false,
@@ -33,6 +34,20 @@ const initMap = () => {
     // 是否显示全屏按钮
     fullscreenButton: false,
     shouldAnimate: true,
+
+    // imageryProvider: new Cesium.UrlTemplateImageryProvider({
+    //   url: "http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
+    // }),
+    // terrainProvider: new Cesium.CesiumTerrainProvider({
+    //   url: "http://data.marsgis.cn/terrain",
+    // }),
+    // skyAtmosphere: false,
+    // orderIndependentTranslucency: false,
+    // contextOptions: {
+    //   webgl: {
+    //     alpha: true,
+    //   },
+    // },
   });
 
   // 设置沙箱允许使用js
@@ -43,10 +58,16 @@ const initMap = () => {
   );
   iframe.setAttribute("src", "");
 
+
+  viewer.terrainProvider = Cesium.createWorldTerrain();
   // 隐藏logo
   viewer.cesiumWidget.creditContainer.style.display = "none";
+  viewer.scene.sun.show = false;
+  viewer.scene.moon.show = true;
+  viewer.scene.undergroundMode = true;
 
   viewer.scene.globe.enableLighting = true;
+  viewer.scene.globe.show = true;
   // 取消天空盒显示
   viewer.scene.skyBox.show = false;
   // 设置背景为黑色

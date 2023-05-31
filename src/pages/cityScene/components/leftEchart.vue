@@ -60,6 +60,10 @@ const createAlarmSituation = () => {
     });
   }
   const option = {
+    title:{
+      show:true,
+      text:"报警情况"
+    },
     tooltip: {
       trigger: "item",
       axisPointer: {
@@ -504,8 +508,11 @@ onMounted(() => {
 .left-echart--cityScene {
   min-width: 280px;
   height: 100%;
-
+  background-color:rgba(30, 37, 39,0.6);
+  padding: 0 10px;
   display: flex;
+  margin: 10px 0;
+  box-sizing: border-box;
   flex-direction: column;
   > div {
     flex: 1;
