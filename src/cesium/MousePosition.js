@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 export default class MousePosition {
-  constructor(viewer) {
+  constructor(viewer,dom) {
     this.divDom = document.createElement("div");
     this.divDom.style.cssText = `
       position: fixed;
@@ -15,7 +15,7 @@ export default class MousePosition {
       text-align: center;
       z-index: 100;
     `;
-    document.body.appendChild(this.divDom);
+    dom.appendChild(this.divDom);
 
     //   监听鼠标的移动事件
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);

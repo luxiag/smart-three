@@ -75,7 +75,7 @@ const initViewer = () => {
   // 取消天空盒显示
   viewer.scene.skyBox.show = false;
   // 设置背景为黑色
-  viewer.scene.backgroundColor = Cesium.Color.BLACK;
+  // viewer.scene.backgroundColor = Cesium.Color.BLACK;
   // 设置抗锯齿
   viewer.scene.postProcessStages.fxaa.enabled = true;
 
@@ -104,7 +104,7 @@ const initViewer = () => {
 onMounted(() => {
   const viewer = initViewer();
 
-  new MousePosition(viewer);
+  new MousePosition(viewer,industrialDistributionRef.value);
 
   new CesiumNavigaion(viewer, {
     // 启用罗盘
@@ -132,7 +132,7 @@ onMounted(() => {
   // 6边形光波扩散特效
   // new LightSpread(viewer);
   // // 创建光墙
-  // new LightWall(viewer);
+  // new LightWall(viewer); 
   // // particleLight,创建烟花粒子
   new ParticleLight(viewer, Cesium.Color.RED);
   new ParticleLight(viewer, Cesium.Color.AQUA);

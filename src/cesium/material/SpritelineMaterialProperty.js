@@ -9,7 +9,7 @@ export default class SpritelineMaterialProperty {
         type: "SpritelineMaterial",
         uniforms: {
           uTime: 0,
-          image: "./texture/spriteline1.png",
+          image: "./textures/spriteline1.png",
         },
         source: `
           czm_material czm_getMaterial(czm_materialInput materialInput)

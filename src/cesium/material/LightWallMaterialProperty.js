@@ -9,7 +9,7 @@ export default class LightWallMaterialProperty {
         type: "LightWallMaterial",
         uniforms: {
           uTime: 0,
-          image: "./texture/spriteline2.png",
+          image: "./textures/spriteline2.png",
         },
         source: `
           czm_material czm_getMaterial(czm_materialInput materialInput)

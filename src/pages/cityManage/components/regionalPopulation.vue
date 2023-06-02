@@ -13,6 +13,20 @@ import CesiumNavigaion from "cesium-navigation-es6";
 
 const regionalPopulationContainer = ref();
 const initMap = () => {
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZjRjYTEwNi0zZTljLTRmMjUtYTdlYi0yYjcxNTRmNzEyNDUiLCJpZCI6MTE5MDM1LCJpYXQiOjE2NzkxNDU5NjR9.0I7z7InLhK57lctyV2bUG0vKLryYKhxYEYF0RpEN4Xw";
+  Cesium.Ion.defaultAccessToken = token;
+  window.CESIUM_BASE_URL = "/Cesium/";
+  Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
+    // 西边的经度
+    89.5,
+    // 南边维度
+    20.4,
+    // 东边经度
+    110.4,
+    // 北边维度
+    61.2
+  );
   const viewer = new Cesium.Viewer(regionalPopulationContainer.value, {
     // 是否显示信息窗口
     // infoBox: false,
@@ -49,6 +63,30 @@ const initMap = () => {
     //   },
     // },
   });
+  const tdt_tk = "f901e2c576a572b55ae86d623207d9ef";
+  const TDTImgProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://t{s}.tianditu.com/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
+      tdt_tk,
+    layer: "天地图影像",
+    style: "default",
+    format: "image/jpeg",
+    subdomains: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    tileMatrixSetID: "GoogleMapsCompatible",
+  });
+
+  const TDTZJProvider = new Cesium.WebMapTileServiceImageryProvider({
+    url:
+      "http://t{s}.tianditu.com/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default.jpg&tk=" +
+      tdt_tk,
+    layer: "天地图中文注记",
+    style: "default",
+    format: "image/jpeg",
+    subdomains: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    tileMatrixSetID: "GoogleMapsCompatible",
+  });
+  viewer.imageryLayers.addImageryProvider(TDTImgProvider); //添加图层
+  viewer.imageryLayers.addImageryProvider(TDTZJProvider); //添加图层
 
   // 设置沙箱允许使用js
   var iframe = document.getElementsByClassName("cesium-infoBox-iframe")[0];
@@ -57,7 +95,6 @@ const initMap = () => {
     "allow-same-origin allow-scripts allow-popups allow-forms"
   );
   iframe.setAttribute("src", "");
-
 
   viewer.terrainProvider = Cesium.createWorldTerrain();
   // 隐藏logo
@@ -71,7 +108,7 @@ const initMap = () => {
   // 取消天空盒显示
   viewer.scene.skyBox.show = false;
   // 设置背景为黑色
-  viewer.scene.backgroundColor = Cesium.Color.BLACK;
+  // viewer.scene.backgroundColor = Cesium.Color.BLACK;
   // 设置抗锯齿
   viewer.scene.postProcessStages.fxaa.enabled = true;
 
@@ -87,8 +124,10 @@ const initMap = () => {
   viewer.camera.flyTo({
     destination: postion,
     orientation: {
-      heading: Cesium.Math.toRadians(-45),
-      pitch: Cesium.Math.toRadians(-30),
+      // heading: Cesium.Math.toRadians(-45),
+      // pitch: Cesium.Math.toRadians(-30),
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-60),
       roll: 0,
     },
     duration: 2,
@@ -97,7 +136,7 @@ const initMap = () => {
   return viewer;
 };
 
-const createMousePosition = () => {
+const createMousePosition = (viewer) => {
   const divDom = document.createElement("div");
   divDom.style.cssText = `
       position: fixed;
@@ -112,7 +151,7 @@ const createMousePosition = () => {
       text-align: center;
       z-index: 100;
     `;
-  document.body.appendChild(divDom);
+  regionalPopulationContainer.value.appendChild(divDom);
 
   //   监听鼠标的移动事件
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -245,13 +284,13 @@ onMounted(async () => {
     // 启用罗盘
     enableCompass: true,
     // 是否启用缩放
-    enableZoomControls: false,
+    enableZoomControls: true,
     // 是否启用指南针外环
     enableCompassOuterRing: true,
     // 是否启用距离的图例
-    // enableDistanceLegend: false,
+    enableDistanceLegend: true,
   });
-  modifyMap(viewer);
+  // modifyMap(viewer);
   // modifyBuild(viewer);
 });
 </script>

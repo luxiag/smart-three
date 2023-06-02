@@ -266,14 +266,16 @@ const createSkyAndSun = () => {
   scene.environment = renderTarget.texture;
 };
 
-const createRing = () => {
+const createRing = (options = {
+  innerRadius:10,
+  outRadius:15
+}) => {
   // 创建一个圆环几何体
-  const geometry = new THREE.RingGeometry(10, 11, 84);
-
+  const geometry = new THREE.RingGeometry(innerRadius, 11, 84);
   // 创建一个着色器材质
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      color: { value: new THREE.Color("red") }, // 圆环的颜色
+      color: { value: new THREE.Color("#b4c2dd") }, // 圆环的颜色
       borderWidth: { value: 0.05 }, // 圆环的边框宽度
       opacity: { value: 0.6 }, // 圆环的透明度
     },
@@ -297,15 +299,20 @@ const createRing = () => {
     }
   `,
     transparent: true, // 开启透明度
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
 
   // 创建一个圆环网格对象
   const ring = new THREE.Mesh(geometry, material);
+  ring.rotateX(-Math.PI / 2);
+
+  
 
   // 将圆环添加到场景中
   scene.add(ring);
 };
+
+const createDashCircle = () => {};
 
 const createInnerCircle = () => {
   // const cylinderGeometry = new THREE.CylinderGeometry(10,84,1);
@@ -428,27 +435,27 @@ const create3DCircle = () => {
 
 float hash12(vec2 x)
 {
- 	return fract(sin(dot(x, vec2(43.5287, 41.12871))) * 523.582);   
+ 	return fract(sin(dot(x, vec2(43.5287, 41.12871))) * 523.582);
 }
 
 vec2 hash21(float x)
 {
- 	return fract(sin(x * vec2(24.0181, 52.1984)) * 5081.4972);   
+ 	return fract(sin(x * vec2(24.0181, 52.1984)) * 5081.4972);
 }
 
 float hash11(float x)
 {
- 	return fract(sin(x * 42.146291) * 4215.4827);   
+ 	return fract(sin(x * 42.146291) * 4215.4827);
 }
 
 vec2 hash22(vec2 x)
 {
- 	return fract(sin(x * mat2x2(24.4372, 12.47864, 32.3874, 29.4873)) * 4762.832);  
+ 	return fract(sin(x * mat2x2(24.4372, 12.47864, 32.3874, 29.4873)) * 4762.832);
 }
 
 mat2x2 rotationMatrix(in float angle)
 {
- 	return mat2x2(-cos(angle), sin(angle), -sin(angle), -cos(angle));   
+ 	return mat2x2(-cos(angle), sin(angle), -sin(angle), -cos(angle));
 }
 
 //Blur function
@@ -468,7 +475,7 @@ vec4 blur(in sampler2D sampler, in vec2 fragCoord, in vec2 resolution)
     }
 
     return sum / 9.0;
-}    
+}
 
 void main(out vec4 fragColor, in vec2 fragCoord) {
 
@@ -710,7 +717,7 @@ onMounted(async () => {
   // createOutCircle();
 
   // createSkyAndSun();
-  createVisitorsFlowrate();
+  // createVisitorsFlowrate();
   createRing();
   animate();
 });
