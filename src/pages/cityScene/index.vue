@@ -64,7 +64,14 @@ import { cloneDeep } from "lodash";
 import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
-let map, scene, camera, renderer, labelRenderer, controls, composer;
+let map,
+  scene,
+  camera,
+  renderer,
+  labelRenderer,
+  controls,
+  composer,
+  isPausedComposer;
 const regions = [];
 const labelGroup = new THREE.Group();
 
@@ -254,7 +261,7 @@ const guangZhouRegionMap = new THREE.Object3D();
 const showRegionGraph = () => {
   activeCompName.value = "administrative";
   // composer.passes.length = 0;
-  hideAllObject(guangZhouRegionMap);
+  hideAllObject(guangZhouRegionMap, true);
 
   console.log(guangZhouMeshMap, "a");
   guangZhouRegionMap.visible = true;
@@ -605,6 +612,24 @@ const createCityCurve = () => {
   // scene.add(labelGroup);
 };
 
+
+const createRegionLine = (cityData) => {
+  const jsonData = cloneDeep(cityData)
+  const features = jsonData.features 
+  features.forEach(feature => {
+    const province = new THREE.Object3D();
+    province.properties = feature.properties.name 
+    const coordinates = feature.geometry.coordinates;
+    if(feature.geometry.type == 'MultiPolygon') {
+      coordinates.forEach(coordinate => {
+         coordinate.forEach(rows => {
+          
+         })
+      })
+    }
+  })
+}
+
 const createCurve2DLabel = () => {
   const labelGroup = new THREE.Group();
   regions.forEach((region) => {
@@ -831,7 +856,7 @@ const createRegion3DBoundary = (cityJSON) => {
   // GDBDiv.id = "GDB-bar";
   GDBDiv.innerHTML =
     '<div id="GDB-bar-echart" class="GDB-bar-echart">GDB-Bar</div>';
-    GDBDiv.style ='height:200px;width:280px;'
+  GDBDiv.style = "height:200px;width:280px;";
   GDBBarCssObj = new CSS2DObject(GDBDiv);
   GDBBarCssObj.visible = true;
   GDBBarCssObj.position.y = 100000;
@@ -857,8 +882,8 @@ const createGDPBarEchart = () => {
   // chartDom.style = "min-width:260px;min-height:200px;";
   // console.log(chartDom.clientWidth, "chartDom");
   // if (!chartDom) return;
-  if(!GDBBar) {
-    GDBBar= echarts.init(chartDom);
+  if (!GDBBar) {
+    GDBBar = echarts.init(chartDom);
   }
   const options = {
     xAxis: {
@@ -948,12 +973,18 @@ const createGDPBar = (event) => {
   // console.log(chartDom.clientWidth, "chartDom height");
 };
 
-const hideAllObject = (noHideObj) => {
+const hideAllObject = (noHideObj, isDownComposer) => {
   let uuids = [];
   if (Array.isArray(noHideObj)) {
     uuids = noHideObj.map((ite) => ite.uuid);
   } else {
     uuids = [noHideObj.uuid];
+  }
+
+  if (isDownComposer) {
+    isPausedComposer = true;
+  } else {
+    isPausedComposer = false;
   }
 
   const passes = composer.passes;
@@ -1006,7 +1037,8 @@ const render = () => {
   controls.update();
   renderer.render(scene, camera);
   labelRenderer?.render(scene, camera);
-  composer?.render();
+
+  if (!isPausedComposer) composer?.render();
 };
 
 onMounted(async () => {
@@ -1018,7 +1050,7 @@ onMounted(async () => {
   initCSS2DRender();
   initControls();
   animate();
-  console.log(composer, "composer");
+  // console.log(composer, "composer");
   // drawCityBoundary(GuangZhouBoundary);
 
   createCityPlane();

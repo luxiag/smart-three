@@ -9,7 +9,7 @@ export default class LightSpreadMaterialProperty {
         type: "LightSpreadMaterial",
         uniforms: {
           uTime: 0,
-          image: "./texture/hexagon.png",
+          image: "./textures/hexagon.png",
         },
         source: `
           czm_material czm_getMaterial(czm_materialInput materialInput)

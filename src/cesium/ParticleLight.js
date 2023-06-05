@@ -14,7 +14,7 @@ export default class ParticleLight {
 
     var particleSystem = new Cesium.ParticleSystem({
       // 粒子纹理
-      image: "./texture/smoke.png",
+      image: "./textures/smoke.png",
       // 粒子图像大小
       //   imageSize: new Cesium.Cartesian2(20, 20),
       // 粒子图像大小随机
