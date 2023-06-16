@@ -15,6 +15,12 @@
         地形概况
       </div>
       <div
+        :class="activeCompName == 'industryMap' ? 'use active' : 'use'"
+        @click="switchComponent('industryMap')"
+      >
+        产业地图
+      </div>
+      <div
         :class="activeCompName == 'regionalPopulation' ? 'use active' : 'use'"
         @click="switchComponent('regionalPopulation')"
       >
@@ -37,12 +43,13 @@
 import container from "@/components/container.vue";
 import landUse from "./components/landUse.vue";
 import topographicOverview from "./components/topographicOverview.vue";
+import industryMap from "./components/industryMap.vue";
 
 const activeCompName = ref("landUse");
-const activeComponent = {landUse,topographicOverview};
+const activeComponent = { landUse, topographicOverview, industryMap };
 
 const switchComponent = (componentName) => {
-    activeCompName.value = componentName
+  activeCompName.value = componentName;
 };
 </script>
 <style scoped lang="less"></style>

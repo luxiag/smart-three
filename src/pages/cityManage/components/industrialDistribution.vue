@@ -101,6 +101,7 @@ const initViewer = () => {
   return viewer;
 };
 
+
 onMounted(() => {
   const viewer = initViewer();
 
@@ -126,7 +127,7 @@ onMounted(() => {
   // 创建区域上升流光飞线
   new RectFlyLight(viewer);
   // // 创建道路飞线
-  // new RoadLightLine(viewer);
+  new RoadLightLine(viewer);
   // 创建雷达
   new RadarLight(viewer);
   // 6边形光波扩散特效

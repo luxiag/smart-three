@@ -17,6 +17,7 @@ specifiers:
   normalize.css: ^8.0.1
   ol: ^7.3.0
   ol-ext: ^4.0.7
+  olcs: ^2.14.0
   pinia: ^2.0.34
   pinia-plugin-persistedstate: ^3.1.0
   three: ^0.151.3
@@ -42,6 +43,7 @@ dependencies:
   normalize.css: 8.0.1
   ol: 7.3.0
   ol-ext: 4.0.7_ol@7.3.0
+  olcs: 2.14.0_cesium@1.104.0+ol@7.3.0
   pinia: 2.0.34_vue@3.2.47
   pinia-plugin-persistedstate: 3.1.0_pinia@2.0.34
   three: 0.151.3
@@ -2458,6 +2460,16 @@ packages:
       ol-mapbox-style: 9.7.0
       pbf: 3.2.1
       rbush: 3.0.1
+    dev: false
+
+  /olcs/2.14.0_cesium@1.104.0+ol@7.3.0:
+    resolution: {integrity: sha512-NedMIA5bHAi6b21r4ODxzTe6zUIjZfY0qTUmiSvAPjn6A8J94wfFZHJXGqBQstXhEZr3/A0qhXwOe/mQwfzogA==}
+    peerDependencies:
+      cesium: '>= 1.62.0'
+      ol: '>= 6.0.1 || 7'
+    dependencies:
+      cesium: 1.104.0
+      ol: 7.3.0
     dev: false
 
   /pako/2.1.0:

@@ -48,7 +48,7 @@ const initMap = () => {
     // 是否显示全屏按钮
     fullscreenButton: false,
     shouldAnimate: true,
-
+    sceneModePicker: true,
     // imageryProvider: new Cesium.UrlTemplateImageryProvider({
     //   url: "http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
     // }),
@@ -276,6 +276,30 @@ const modifyBuild = (viewer) => {
   });
 };
 
+const createGoogle3Dtiles = async (viewer) => {
+  try {
+    const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+    viewer.scene.primitives.add(tileset);
+  } catch (error) {
+    console.log(`Error loading Photorealistic 3D Tiles tileset.
+  ${error}`);
+  }
+};
+
+const createCylinder = (viewer) => {
+  viewer.entities.add({
+    name: "cylinder",
+    position: new Cesium.Cartesian3.fromDegrees(119.999, 23.1136, 100),
+    cylinder: {
+      length: 900.0,
+      topRadius: 500.0,
+      bottomRadius: 500.0,
+      height:0,
+      material: Cesium.Color.RED,
+    },
+  });
+};
+
 onMounted(async () => {
   const viewer = initMap();
   createMousePosition(viewer);
@@ -290,6 +314,8 @@ onMounted(async () => {
     // 是否启用距离的图例
     enableDistanceLegend: true,
   });
+  createGoogle3Dtiles();
+  createCylinder(viewer);
   // modifyMap(viewer);
   // modifyBuild(viewer);
 });

@@ -266,12 +266,15 @@ const createSkyAndSun = () => {
   scene.environment = renderTarget.texture;
 };
 
-const createRing = (options = {
-  innerRadius:10,
-  outRadius:15
-}) => {
+const ringGroup = new THREE.Group();
+const createRing = (
+  options = {
+    innerRadius: 10,
+    outRadius: 15,
+  }
+) => {
   // 创建一个圆环几何体
-  const geometry = new THREE.RingGeometry(innerRadius, 11, 84);
+  const geometry = new THREE.RingGeometry(options.innerRadius, 11, 84);
   // 创建一个着色器材质
   const material = new THREE.ShaderMaterial({
     uniforms: {
@@ -305,11 +308,65 @@ const createRing = (options = {
   // 创建一个圆环网格对象
   const ring = new THREE.Mesh(geometry, material);
   ring.rotateX(-Math.PI / 2);
+  ringGroup.add(ring);
 
-  
+  const outGeometry = new THREE.RingGeometry(
+    options.outRadius,
+    options.outRadius + 2,
+    84
+  );
+  const outMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      color: { value: new THREE.Color("#D500F9") }, // 圆环的颜色
+      borderWidth: { value: 0.05 }, // 圆环的边框宽度
+      opacity: { value: 0.6 }, // 圆环的透明度
+    },
+    vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+    fragmentShader: `
+    uniform vec3 color;
+    uniform float borderWidth;
+    uniform float opacity;
+    varying vec2 vUv;
+    void main() {
+      float r = length(vUv - vec2(0.5)); // 计算像素点到圆心的距离
+      float a = smoothstep(0.5 - borderWidth, 0.5, r); // 计算像素点的透明度，边缘平滑处理
+      a *= opacity * (1.0 - r * 1.0); // 让透明度从外到内逐渐变化
+      gl_FragColor = vec4(color, a); // 设置像素点的颜色和透明度
+    }
+  `,
+    transparent: true, // 开启透明度
+    side: THREE.DoubleSide,
+  });
 
+  const outRing = new THREE.Mesh(outGeometry, outMaterial);
+  outRing.rotateX(-Math.PI / 2);
+  ringGroup.add(outRing);
+
+  const dashMaterial = new THREE.LineDashedMaterial({
+    color: 0xffffff,
+    linewidth: 1,
+    scale: 1,
+    dashSize: 3,
+    gapSize: 1,
+  });
+  const dashGeometry = new THREE.CircleGeometry(options.outRadius, 32);
+  const points = dashGeometry.vertices;
+  console.log(points,dashGeometry,'points')
+  const spline = new THREE.CatmullRomCurve3(points);
+  const samples = spline.getPoints(points);
+  const dashGeometrySpline = new THREE.BufferGeometry().setFromPoints(samples);
+
+  const dashCircle = new THREE.Line(dashGeometrySpline, dashMaterial);
+  dashCircle.computeLineDistances();
+  ringGroup.add(dashCircle);
   // 将圆环添加到场景中
-  scene.add(ring);
+  scene.add(ringGroup);
 };
 
 const createDashCircle = () => {};
