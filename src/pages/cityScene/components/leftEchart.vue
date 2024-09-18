@@ -60,9 +60,9 @@ const createAlarmSituation = () => {
     });
   }
   const option = {
-    title:{
-      show:true,
-      text:"报警情况"
+    title: {
+      show: false,
+      text: "报警情况"
     },
     tooltip: {
       trigger: "item",
@@ -72,10 +72,10 @@ const createAlarmSituation = () => {
           color: "rgba(255, 255, 255, 1)",
         },
       },
-      textStyle:{
-        color:'#fff'
+      textStyle: {
+        color: '#fff'
       },
-      backgroundColor:"rgba(0,0,0,0.6)"
+      backgroundColor: "rgba(0,0,0,0.6)"
     },
     legend: {
       data: nameVal,
@@ -508,15 +508,17 @@ onMounted(() => {
 .left-echart--cityScene {
   min-width: 280px;
   height: 100%;
-  background-color:rgba(30, 37, 39,0.6);
+  // background-color:rgba(30, 37, 39,0.6);
   padding: 0 10px;
   display: flex;
   margin: 10px 0;
   box-sizing: border-box;
   flex-direction: column;
-  > div {
+
+  >div {
     flex: 1;
-    > div {
+
+    >div {
       width: 100%;
       height: 100%;
     }

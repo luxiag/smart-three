@@ -4,28 +4,16 @@
       <leftEchart />
     </template>
     <template v-slot:left-use>
-      <div
-        :class="activeCompName == 'administrative' ? 'use active' : 'use'"
-        @click="showRegionGraph"
-      >
+      <div :class="activeCompName == 'administrative' ? 'use active' : 'use'" @click="showRegionGraph">
         行政规划
       </div>
-      <div
-        :class="activeCompName == 'population' ? 'use active' : 'use'"
-        @click="showRegionCurve"
-      >
+      <div :class="activeCompName == 'population' ? 'use active' : 'use'" @click="showRegionCurve">
         人口分布
       </div>
-      <div
-        :class="activeCompName == 'ecology' ? 'use active' : 'use'"
-        @click="showRegionMeshGraph"
-      >
+      <div :class="activeCompName == 'ecology' ? 'use active' : 'use'" @click="showRegionMeshGraph">
         生态环境
       </div>
-      <div
-        :class="activeCompName == 'economics' ? 'use active' : 'use'"
-        @click="showRegion3DBoundary"
-      >
+      <div :class="activeCompName == 'economics' ? 'use active' : 'use'" @click="showRegion3DBoundary">
         经济分布
       </div>
     </template>
@@ -236,7 +224,7 @@ const createLight = () => {
   scene.add(light);
 };
 
-const createCityPlaneLabel = () => {};
+const createCityPlaneLabel = () => { };
 
 let gzPlane;
 const createCityPlane = () => {
@@ -615,16 +603,16 @@ const createCityCurve = () => {
 
 const createRegionLine = (cityData) => {
   const jsonData = cloneDeep(cityData)
-  const features = jsonData.features 
+  const features = jsonData.features
   features.forEach(feature => {
     const province = new THREE.Object3D();
-    province.properties = feature.properties.name 
+    province.properties = feature.properties.name
     const coordinates = feature.geometry.coordinates;
-    if(feature.geometry.type == 'MultiPolygon') {
+    if (feature.geometry.type == 'MultiPolygon') {
       coordinates.forEach(coordinate => {
-         coordinate.forEach(rows => {
-          
-         })
+        coordinate.forEach(rows => {
+
+        })
       })
     }
   })
@@ -746,10 +734,8 @@ const showRegion3DBoundary = () => {
   gzPlane.visible = true;
   region3DBoundary.visible = true;
   if (region3DBoundary.children.length == 0) {
-    console.log("a");
     createRegion3DBoundary(GuangZhou);
   } else {
-    console.log("b");
     window.addEventListener("mousemove", createGDPBar);
   }
 };
@@ -866,7 +852,10 @@ const createRegion3DBoundary = (cityJSON) => {
   region3DBoundary.position.z = -0.1;
   scene.add(region3DBoundary);
   css2dLabelObj[region3DBoundary.uuid] = labelArr;
-  window.addEventListener("mousemove", createGDPBar);
+  nextTick(() => {
+    window.addEventListener("mousemove", createGDPBar);
+
+  })
 
   // createGDPBar();
   // nextTick(() => {
@@ -878,8 +867,8 @@ let GDBBar;
 const createGDPBarEchart = () => {
   // const chartDom
   const chartDom = GDBDiv.getElementsByClassName("GDB-bar-echart")[0];
-  console.log(chartDom, chartDom.clientWidth);
-  // chartDom.style = "min-width:260px;min-height:200px;";
+  console.log(chartDom, chartDom.clientWidth, 'createGDP');
+  chartDom.style = "min-width:260px;min-height:200px;";
   // console.log(chartDom.clientWidth, "chartDom");
   // if (!chartDom) return;
   if (!GDBBar) {
@@ -957,8 +946,10 @@ const createGDPBar = (event) => {
     interects[0].object.material[1].color = new THREE.Color("#69F0AE");
     GDBBarCssObj.position.copy(interects[0].point);
     GDBBarCssObj.visible = true;
+    nextTick(() => {
+      createGDPBarEchart();
 
-    createGDPBarEchart();
+    })
     console.log(interects, "interface");
   } else {
     GDBBarCssObj.visible = false;
@@ -1060,6 +1051,7 @@ onMounted(async () => {
   //   cubeTest();
   // initAxesHelper();
   // createCityCurve();
+  showRegionGraph()
 });
 </script>
 <style scoped lang="less">
@@ -1068,10 +1060,13 @@ onMounted(async () => {
   padding: 4px;
   font-size: 12px;
   display: flex;
+
   .left {
     margin-right: 8px;
+
     .label-title {
       margin-bottom: 5px;
+
       .circle {
         width: 10px;
         height: 10px;
@@ -1081,6 +1076,7 @@ onMounted(async () => {
       }
     }
   }
+
   .right {
     .circle {
       background-color: rgba(255, 255, 255, 0.3);
@@ -1096,9 +1092,11 @@ onMounted(async () => {
       font-weight: 700;
     }
   }
+
   .yellow {
     color: #fdd835;
   }
+
   p {
     margin: 4px 0;
   }
@@ -1111,9 +1109,11 @@ onMounted(async () => {
   padding: 2px 4px;
   border: 1px solid #fff;
 }
+
 :deep(#GDB-bar-echart) {
   width: 280px;
   height: 200px;
   background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
 }
 </style>
